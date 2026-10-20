@@ -7,3 +7,4 @@ coverage/
 !.env.example
 token.npm.txt
 .npmrc.local
+barzano/

@@ -2,6 +2,23 @@
 
 SDK oficial TypeScript para criar e acompanhar pagamentos pela Barzano Pay.
 
+## Configuração assistida
+
+```bash
+npx @barzano/pay init
+```
+
+O assistente reutiliza `BARZANO_PAY_API_KEY` do ambiente ou do `.env`. Sem uma chave, permite criar
+uma conta, confirmar o e-mail, entrar e gerar uma chave sandbox. O access token humano fica apenas
+na memória; o projeto usa a integration key.
+
+Comandos adicionais:
+
+```bash
+npx barzano doctor
+npx barzano providers
+```
+
 ## Instalação
 
 ```bash
@@ -53,3 +70,6 @@ const event = verifyWebhook({
 ```
 
 Consulte a [documentação da API](https://pay.barzano.com.br/docs).
+
+Veja também o [mapa de SDKs oficiais](docs/SDK-ROADMAP.md), com a ordem sugerida para Node.js,
+Python, .NET, Java e PHP.
