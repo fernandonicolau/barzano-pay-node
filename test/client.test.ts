@@ -49,4 +49,38 @@ describe('BarzanoPay', () => {
     await expect(promise).rejects.toBeInstanceOf(BarzanoError);
     await expect(promise).rejects.toMatchObject({ code: 'INVALID_REQUEST', status: 400, requestId: 'req_1' });
   });
+
+  it('reports safe response metadata without exposing credentials or payloads', async () => {
+    const onResponse = vi.fn();
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ id: 'pay_1', status: 'WAITING_PAYMENT' }), {
+        status: 200,
+        headers: { 'x-request-id': 'req_header' },
+      }),
+    );
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn, onResponse });
+
+    await client.payments.retrieve('pay_1');
+
+    expect(onResponse).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/api/v1/payments/pay_1',
+      status: 200,
+      durationMs: expect.any(Number),
+      requestId: 'req_header',
+    });
+    expect(JSON.stringify(onResponse.mock.calls)).not.toContain('pay_test_secret');
+  });
+
+  it('uses the response requestId header when an error body has no correlation id', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response('{}', { status: 503, headers: { 'x-request-id': 'req_header' } }),
+    );
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
+
+    await expect(client.payments.retrieve('pay_1')).rejects.toMatchObject({
+      status: 503,
+      requestId: 'req_header',
+    });
+  });
 });

@@ -12,6 +12,15 @@ export interface BarzanoPayOptions {
   baseUrl?: string;
   timeoutMs?: number;
   fetch?: typeof globalThis.fetch;
+  onResponse?: (metadata: BarzanoResponseMetadata) => void;
+}
+
+export interface BarzanoResponseMetadata {
+  method: string;
+  path: string;
+  status: number;
+  durationMs: number;
+  requestId: string | null;
 }
 
 interface RequestOptions {
@@ -37,6 +46,7 @@ export class BarzanoPay {
   private readonly baseUrl: string;
   private readonly timeoutMs: number;
   private readonly fetchFn: typeof globalThis.fetch;
+  private readonly onResponse?: BarzanoPayOptions['onResponse'];
 
   constructor(options: BarzanoPayOptions) {
     if (!options.apiKey.trim()) throw new Error('apiKey is required.');
@@ -44,6 +54,7 @@ export class BarzanoPay {
     this.baseUrl = (options.baseUrl ?? URLS[options.environment ?? 'sandbox']).replace(/\/$/, '');
     this.timeoutMs = options.timeoutMs ?? 10_000;
     this.fetchFn = options.fetch ?? globalThis.fetch;
+    this.onResponse = options.onResponse;
     if (!this.fetchFn) throw new Error('A Fetch API implementation is required.');
 
     this.payments = {
@@ -67,6 +78,8 @@ export class BarzanoPay {
   }
 
   private async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+    const startedAt = Date.now();
+    const method = options.method ?? 'GET';
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
     const onAbort = (): void => controller.abort(options.signal?.reason);
@@ -74,7 +87,7 @@ export class BarzanoPay {
 
     try {
       const response = await this.fetchFn(`${this.baseUrl}${path}`, {
-        method: options.method ?? 'GET',
+        method,
         signal: controller.signal,
         headers: {
           Accept: 'application/vnd.barzano.error.v2+json',
@@ -86,8 +99,21 @@ export class BarzanoPay {
       });
 
       const raw = await response.text();
-      const data = raw ? (JSON.parse(raw) as unknown) : null;
-      if (!response.ok) throw this.toError(response.status, data);
+      let data: unknown = null;
+      try {
+        data = raw ? (JSON.parse(raw) as unknown) : null;
+      } catch {
+        data = null;
+      }
+      const requestId = this.requestId(data, response.headers.get('x-request-id'));
+      this.notifyResponse({
+        method,
+        path,
+        status: response.status,
+        durationMs: Date.now() - startedAt,
+        requestId,
+      });
+      if (!response.ok) throw this.toError(response.status, data, requestId);
       return data as T;
     } catch (error) {
       if (error instanceof BarzanoError) throw error;
@@ -106,7 +132,7 @@ export class BarzanoPay {
     }
   }
 
-  private toError(status: number, body: unknown): BarzanoError {
+  private toError(status: number, body: unknown, requestId: string | null): BarzanoError {
     const value = body as {
       error?: { code?: string; message?: string; requestId?: string; details?: unknown } | string;
       code?: string;
@@ -118,8 +144,24 @@ export class BarzanoPay {
       nested?.message ?? value?.message ?? 'Barzano Pay request failed.',
       nested?.code ?? value?.code ?? `HTTP_${status}`,
       status,
-      nested?.requestId ?? value?.requestId ?? null,
+      nested?.requestId ?? value?.requestId ?? requestId,
       nested?.details,
     );
+  }
+
+  private requestId(body: unknown, header: string | null): string | null {
+    const value = body as
+      | { error?: { requestId?: string } | string; requestId?: string }
+      | null;
+    const nested = value?.error && typeof value.error === 'object' ? value.error : null;
+    return nested?.requestId ?? value?.requestId ?? header;
+  }
+
+  private notifyResponse(metadata: BarzanoResponseMetadata): void {
+    try {
+      this.onResponse?.(metadata);
+    } catch {
+      // Observability hooks must never change a payment request result.
+    }
   }
 }

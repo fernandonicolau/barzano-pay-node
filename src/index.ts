@@ -1,4 +1,8 @@
-export { BarzanoPay, type BarzanoPayOptions } from './client.js';
+export {
+  BarzanoPay,
+  type BarzanoPayOptions,
+  type BarzanoResponseMetadata,
+} from './client.js';
 export { BarzanoError } from './errors.js';
 export { verifyWebhook, type VerifyWebhookInput } from './webhooks.js';
 export { OnboardingApi } from './onboarding-api.js';

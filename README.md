@@ -54,6 +54,23 @@ const payment = await barzano.payments.create(
 console.log(payment.pix?.copyAndPaste);
 ```
 
+## Correlação e observabilidade
+
+Use `onResponse` para enviar metadados seguros ao seu logger ou ferramenta de observabilidade. O SDK
+não inclui API key, body ou dados do cliente nesse callback.
+
+```ts
+const barzano = new BarzanoPay({
+  apiKey: process.env.BARZANO_PAY_API_KEY!,
+  onResponse: ({ requestId, status, method, path, durationMs }) => {
+    logger.info({ requestId, status, method, path, durationMs }, 'Barzano Pay request');
+  },
+});
+```
+
+Erros `BarzanoError` também expõem `requestId`, permitindo correlacionar o problema com o painel e o
+suporte da Barzano Pay.
+
 ## Validar webhook
 
 Use o corpo bruto da requisição. Não faça `JSON.parse` antes da validação.
