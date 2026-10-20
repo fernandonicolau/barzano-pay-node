@@ -37,6 +37,15 @@ export interface CreatePaymentOptions {
   signal?: AbortSignal;
 }
 
+export interface ListPaymentsOptions {
+  externalId?: string;
+  storeId?: string;
+  status?: PaymentStatus;
+  paymentMethod?: PaymentMethod;
+  providerCode?: string;
+  signal?: AbortSignal;
+}
+
 export interface PaymentInstructions {
   type: PaymentMethod;
   copyAndPaste?: string;
@@ -51,6 +60,8 @@ export interface Payment {
   id: string;
   chargeId?: string;
   externalId: string;
+  storeId?: string;
+  paymentAccountId?: string | null;
   status: PaymentStatus;
   amount: number;
   currency: string;
@@ -67,6 +78,8 @@ export interface Payment {
     status?: string | null;
   } | null;
   nextAction?: Record<string, unknown> | null;
+  createdAt?: string;
+  updatedAt?: string;
   [key: string]: unknown;
 }
 

@@ -3,6 +3,7 @@ import type {
   BarzanoEnvironment,
   CreatePaymentInput,
   CreatePaymentOptions,
+  ListPaymentsOptions,
   Payment,
 } from './types.js';
 
@@ -39,7 +40,7 @@ export class BarzanoPay {
   readonly payments: {
     create: (input: CreatePaymentInput, options: CreatePaymentOptions) => Promise<Payment>;
     retrieve: (paymentId: string, signal?: AbortSignal) => Promise<Payment>;
-    list: (externalId?: string, signal?: AbortSignal) => Promise<Payment[]>;
+    list: (options?: ListPaymentsOptions | string, signal?: AbortSignal) => Promise<Payment[]>;
   };
 
   private readonly apiKey: string;
@@ -69,11 +70,20 @@ export class BarzanoPay {
         this.request<Payment>(`/api/v1/payments/${encodeURIComponent(paymentId)}`, {
           ...(signal ? { signal } : {}),
         }),
-      list: (externalId, signal) =>
-        this.request<Payment[]>(
-          `/api/v1/payments${externalId ? `?externalId=${encodeURIComponent(externalId)}` : ''}`,
-          { ...(signal ? { signal } : {}) },
-        ),
+      list: (options = {}, legacySignal) => {
+        const filters: ListPaymentsOptions = typeof options === 'string'
+          ? { externalId: options, ...(legacySignal ? { signal: legacySignal } : {}) }
+          : options;
+        const params = new URLSearchParams();
+        for (const key of ['externalId', 'storeId', 'status', 'paymentMethod', 'providerCode'] as const) {
+          const value = filters[key];
+          if (value) params.set(key, value);
+        }
+        const query = params.toString();
+        return this.request<Payment[]>(`/api/v1/payments${query ? `?${query}` : ''}`, {
+          ...(filters.signal ? { signal: filters.signal } : {}),
+        });
+      },
     };
   }
 

@@ -54,6 +54,19 @@ const payment = await barzano.payments.create(
 console.log(payment.pix?.copyAndPaste);
 ```
 
+## Consultar pagamentos
+
+```ts
+const paidPix = await barzano.payments.list({
+  storeId: 'sua-store-id',
+  status: 'PAID',
+  paymentMethod: 'PIX',
+  providerCode: 'PAGBANK',
+});
+```
+
+Os filtros são aplicados pela API e sempre respeitam o tenant associado à integration key.
+
 ## Correlação e observabilidade
 
 Use `onResponse` para enviar metadados seguros ao seu logger ou ferramenta de observabilidade. O SDK

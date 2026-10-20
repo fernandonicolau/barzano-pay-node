@@ -11,6 +11,7 @@ export type {
   BarzanoWebhookEvent,
   CreatePaymentInput,
   CreatePaymentOptions,
+  ListPaymentsOptions,
   Customer,
   Payment,
   PaymentInstructions,

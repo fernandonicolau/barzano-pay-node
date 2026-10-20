@@ -83,4 +83,14 @@ describe('BarzanoPay', () => {
       requestId: 'req_header',
     });
   });
+
+  it('lists payments with typed operational filters', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(new Response('[]', { status: 200 }));
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
+    await client.payments.list({ storeId: 'store_1', status: 'PAID', paymentMethod: 'PIX', providerCode: 'PAGBANK' });
+    expect(fetchFn).toHaveBeenCalledWith(
+      'https://pay.barzano.com.br/api/v1/payments?storeId=store_1&status=PAID&paymentMethod=PIX&providerCode=PAGBANK',
+      expect.any(Object),
+    );
+  });
 });
