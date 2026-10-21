@@ -8,6 +8,15 @@ ao banco ou provider.
 - [Documentação completa da API](https://pay.barzano.com.br/docs)
 - [Pacote no npm](https://www.npmjs.com/package/@barzano/pay)
 
+## Guias
+
+- [Início rápido e configuração](docs/GETTING-STARTED.md)
+- [Criar e consultar pagamentos](docs/PAYMENTS.md)
+- [Receber e validar webhooks](docs/WEBHOOKS.md)
+- [Erros, idempotência e observabilidade](docs/ERRORS.md)
+- [CLI e configuração assistida](docs/CLI.md)
+- [Migração e tipos depreciados](docs/MIGRATION.md)
+
 ## Providers e meios disponíveis
 
 O catálogo é dinâmico: consulte a API para saber quais providers, ambientes e meios estão realmente
@@ -175,10 +184,10 @@ Use o corpo bruto da requisição. Não faça `JSON.parse` antes da validação.
 ```ts
 import {
   verifyWebhook,
-  type BarzanoAnyWebhookEvent,
+  type AnyWebhookEvent,
 } from '@barzano/pay';
 
-const event: BarzanoAnyWebhookEvent = verifyWebhook({
+const event: AnyWebhookEvent = verifyWebhook({
   payload: rawBody,
   signature: request.headers['x-webhook-signature'],
   timestamp: request.headers['x-webhook-timestamp'],
