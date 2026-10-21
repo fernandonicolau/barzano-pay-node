@@ -50,6 +50,11 @@ npm install @barzano/pay
 
 ## Criar um PIX
 
+> **Atenção aos dados do pagador:** em sandbox e produção, o CPF/CNPJ e o e-mail enviados em
+> `payer` devem identificar o comprador e ser diferentes dos dados do estabelecimento recebedor e
+> do titular da conta no provider. A API rejeita a cobrança antes de chamar o provider com
+> `PAYER_DOCUMENT_MUST_DIFFER_FROM_MERCHANT` ou `PAYER_EMAIL_MUST_DIFFER_FROM_MERCHANT`.
+
 ```ts
 import { BarzanoPay } from '@barzano/pay';
 
