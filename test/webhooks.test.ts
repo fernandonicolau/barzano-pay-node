@@ -32,4 +32,14 @@ describe('verifyWebhook', () => {
       }),
     ).toThrow('Invalid webhook signature.');
   });
+
+  it('parses a signed synthetic test event', () => {
+    const payload = JSON.stringify({ type: 'webhook.test', data: { chargeId: null, status: 'TEST' } });
+    const timestamp = '1792512000';
+    const signature = createHmac('sha256', 'secret').update(`${timestamp}.${payload}`).digest('hex');
+
+    const event = verifyWebhook({ payload, timestamp, signature, secret: 'secret', now: new Date(Number(timestamp) * 1000) });
+
+    expect(event.type).toBe('webhook.test');
+  });
 });

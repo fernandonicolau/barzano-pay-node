@@ -87,7 +87,8 @@ export interface Payment {
 export type BarzanoWebhookEventType =
   | 'charge.paid'
   | 'charge.expired'
-  | 'charge.failed';
+  | 'charge.failed'
+  | 'webhook.test';
 
 export interface BarzanoChargeWebhookData {
   chargeId: string;
@@ -106,4 +107,22 @@ export interface BarzanoWebhookEvent<T = BarzanoChargeWebhookData> {
   data: T;
 }
 
-export type BarzanoChargeWebhookEvent = BarzanoWebhookEvent<BarzanoChargeWebhookData>;
+export type BarzanoChargeWebhookEvent = BarzanoWebhookEvent<BarzanoChargeWebhookData> & {
+  type: Exclude<BarzanoWebhookEventType, 'webhook.test'>;
+};
+
+export interface BarzanoTestWebhookData {
+  chargeId: null;
+  externalId: string;
+  storeExternalId: null;
+  amount: 0;
+  currency: 'BRL';
+  status: 'TEST';
+  paidAt: null;
+}
+
+export type BarzanoTestWebhookEvent = BarzanoWebhookEvent<BarzanoTestWebhookData> & {
+  type: 'webhook.test';
+};
+
+export type BarzanoAnyWebhookEvent = BarzanoChargeWebhookEvent | BarzanoTestWebhookEvent;

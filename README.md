@@ -131,10 +131,10 @@ Use o corpo bruto da requisição. Não faça `JSON.parse` antes da validação.
 ```ts
 import {
   verifyWebhook,
-  type BarzanoChargeWebhookEvent,
+  type BarzanoAnyWebhookEvent,
 } from '@barzano/pay';
 
-const event: BarzanoChargeWebhookEvent = verifyWebhook({
+const event: BarzanoAnyWebhookEvent = verifyWebhook({
   payload: rawBody,
   signature: request.headers['x-webhook-signature'],
   timestamp: request.headers['x-webhook-timestamp'],
@@ -142,6 +142,9 @@ const event: BarzanoChargeWebhookEvent = verifyWebhook({
 });
 
 switch (event.type) {
+  case 'webhook.test':
+    console.log('Entrega de teste recebida', event.id);
+    break;
   case 'charge.paid':
     await markOrderAsPaid(event.data.externalId);
     break;
@@ -152,8 +155,9 @@ switch (event.type) {
 }
 ```
 
-O evento validado já é tipado com `chargeId`, `externalId`, `storeExternalId`, valor em centavos,
-moeda, status e data de pagamento. Use o header `X-Webhook-Id` ou `event.id` como chave de
+O evento validado já diferencia eventos financeiros de `webhook.test`. Eventos financeiros incluem
+`chargeId`, `externalId`, `storeExternalId`, valor em centavos, moeda, status e data de pagamento.
+Use o header `X-Webhook-Id` ou `event.id` como chave de
 idempotência para não processar a mesma notificação duas vezes.
 
 Consulte a [documentação da API](https://pay.barzano.com.br/docs).

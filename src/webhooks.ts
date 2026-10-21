@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-import type { BarzanoChargeWebhookEvent, BarzanoWebhookEvent } from './types.js';
+import type { BarzanoAnyWebhookEvent, BarzanoWebhookEvent } from './types.js';
 
 export interface VerifyWebhookInput {
   payload: string | Uint8Array;
@@ -17,7 +17,7 @@ function bytes(value: string): Buffer {
   return Buffer.from(normalized, 'hex');
 }
 
-export function verifyWebhook(input: VerifyWebhookInput): BarzanoChargeWebhookEvent;
+export function verifyWebhook(input: VerifyWebhookInput): BarzanoAnyWebhookEvent;
 export function verifyWebhook<T>(input: VerifyWebhookInput): BarzanoWebhookEvent<T>;
 export function verifyWebhook<T>(input: VerifyWebhookInput): BarzanoWebhookEvent<T> {
   const payload =
