@@ -93,4 +93,17 @@ describe('BarzanoPay', () => {
       expect.any(Object),
     );
   });
+
+  it('discovers providers and payment methods supported by the account', async () => {
+    const catalog = [{ provider: 'PAGBANK', displayName: 'PagBank', capabilities: { supportedPaymentMethods: ['PIX'] } }];
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify(catalog), { status: 200 }),
+    );
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
+    await expect(client.providers.list()).resolves.toEqual(catalog);
+    expect(fetchFn).toHaveBeenCalledWith(
+      'https://pay.barzano.com.br/api/v1/providers',
+      expect.objectContaining({ method: 'GET' }),
+    );
+  });
 });

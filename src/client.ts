@@ -6,6 +6,7 @@ import type {
   ListPaymentsOptions,
   Payment,
 } from './types.js';
+import type { ProviderCatalogEntry } from './onboarding-api.js';
 
 export interface BarzanoPayOptions {
   apiKey: string;
@@ -41,6 +42,9 @@ export class BarzanoPay {
     create: (input: CreatePaymentInput, options: CreatePaymentOptions) => Promise<Payment>;
     retrieve: (paymentId: string, signal?: AbortSignal) => Promise<Payment>;
     list: (options?: ListPaymentsOptions | string, signal?: AbortSignal) => Promise<Payment[]>;
+  };
+  readonly providers: {
+    list: (signal?: AbortSignal) => Promise<ProviderCatalogEntry[]>;
   };
 
   private readonly apiKey: string;
@@ -84,6 +88,12 @@ export class BarzanoPay {
           ...(filters.signal ? { signal: filters.signal } : {}),
         });
       },
+    };
+    this.providers = {
+      list: (signal) =>
+        this.request<ProviderCatalogEntry[]>('/api/v1/providers', {
+          ...(signal ? { signal } : {}),
+        }),
     };
   }
 

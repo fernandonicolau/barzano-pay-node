@@ -7,6 +7,7 @@ export type PaymentStatus =
   | 'AUTHORIZED'
   | 'PAID'
   | 'FAILED'
+  | 'CANCELED'
   | 'CANCELLED'
   | 'REFUNDED'
   | 'PARTIALLY_REFUNDED'
@@ -83,10 +84,26 @@ export interface Payment {
   [key: string]: unknown;
 }
 
-export interface BarzanoWebhookEvent<T = Record<string, unknown>> {
-  id?: string;
-  type: string;
-  createdAt?: string;
-  data: T;
-  [key: string]: unknown;
+export type BarzanoWebhookEventType =
+  | 'charge.paid'
+  | 'charge.expired'
+  | 'charge.failed';
+
+export interface BarzanoChargeWebhookData {
+  chargeId: string;
+  externalId: string;
+  storeExternalId: string | null;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  paidAt: string | null;
 }
+
+export interface BarzanoWebhookEvent<T = BarzanoChargeWebhookData> {
+  id: string;
+  type: BarzanoWebhookEventType;
+  createdAt: string;
+  data: T;
+}
+
+export type BarzanoChargeWebhookEvent = BarzanoWebhookEvent<BarzanoChargeWebhookData>;
