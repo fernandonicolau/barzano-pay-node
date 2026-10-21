@@ -13,7 +13,7 @@ export type PaymentStatus =
   | 'PARTIALLY_REFUNDED'
   | 'EXPIRED';
 
-export interface Customer {
+export interface Payer {
   name: string;
   email: string;
   taxId: string;
@@ -26,12 +26,29 @@ export interface CreatePaymentInput {
   currency?: 'BRL';
   method: PaymentMethod;
   description?: string;
-  expiresAt?: string;
-  customer: Customer;
+  /** PIX expiration in seconds (1 to 2,592,000). */
+  expiresIn?: number;
+  /** Buyer data sent to the payment provider. */
+  payer: Payer;
   providerCode?: string;
   metadata?: Record<string, unknown>;
   [key: string]: unknown;
 }
+
+/** @deprecated Use Payer. */
+export type Customer = Payer;
+
+/** Compatibility shape accepted by SDK versions 0.1.x and 0.2.1. */
+export interface LegacyCreatePaymentInput extends Omit<CreatePaymentInput, 'payer' | 'expiresIn'> {
+  /** @deprecated Use payer. */
+  customer: Customer;
+  /** @deprecated Use expiresIn. The SDK converts this instant to seconds. */
+  expiresAt?: string;
+  payer?: never;
+  expiresIn?: number;
+}
+
+export type CreatePaymentRequest = CreatePaymentInput | LegacyCreatePaymentInput;
 
 export interface CreatePaymentOptions {
   idempotencyKey: string;

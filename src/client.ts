@@ -1,7 +1,7 @@
 import { BarzanoError } from './errors.js';
 import type {
   BarzanoEnvironment,
-  CreatePaymentInput,
+  CreatePaymentRequest,
   CreatePaymentOptions,
   ListPaymentsOptions,
   Payment,
@@ -39,7 +39,7 @@ const URLS: Record<BarzanoEnvironment, string> = {
 
 export class BarzanoPay {
   readonly payments: {
-    create: (input: CreatePaymentInput, options: CreatePaymentOptions) => Promise<Payment>;
+    create: (input: CreatePaymentRequest, options: CreatePaymentOptions) => Promise<Payment>;
     retrieve: (paymentId: string, signal?: AbortSignal) => Promise<Payment>;
     list: (options?: ListPaymentsOptions | string, signal?: AbortSignal) => Promise<Payment[]>;
   };
@@ -66,7 +66,7 @@ export class BarzanoPay {
       create: (input, requestOptions) =>
         this.request<Payment>('/api/v1/payments', {
           method: 'POST',
-          body: input,
+          body: this.normalizePaymentInput(input),
           ...(requestOptions.signal ? { signal: requestOptions.signal } : {}),
           headers: { 'Idempotency-Key': requestOptions.idempotencyKey },
         }),
@@ -95,6 +95,23 @@ export class BarzanoPay {
           ...(signal ? { signal } : {}),
         }),
     };
+  }
+
+  private normalizePaymentInput(input: CreatePaymentRequest): Record<string, unknown> {
+    const legacy = input as CreatePaymentRequest & { customer?: unknown; expiresAt?: string };
+    const { customer, expiresAt, ...body } = legacy;
+    const normalized: Record<string, unknown> = {
+      ...body,
+      payer: 'payer' in input ? input.payer : customer,
+    };
+    if (expiresAt && normalized.expiresIn === undefined) {
+      const milliseconds = Date.parse(expiresAt) - Date.now();
+      if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
+        throw new Error('expiresAt must be a valid future date. Prefer expiresIn in seconds.');
+      }
+      normalized.expiresIn = Math.max(1, Math.ceil(milliseconds / 1000));
+    }
+    return normalized;
   }
 
   private async request<T>(path: string, options: RequestOptions = {}): Promise<T> {

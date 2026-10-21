@@ -18,7 +18,8 @@ describe('BarzanoPay', () => {
         storeId: 'store_1',
         amount: 200,
         method: 'PIX',
-        customer: { name: 'Cliente Teste', email: 'cliente@example.com', taxId: '52998224725' },
+        expiresIn: 1800,
+        payer: { name: 'Cliente Teste', email: 'cliente@example.com', taxId: '52998224725' },
       },
       { idempotencyKey: 'order_1-v1' },
     );
@@ -34,6 +35,30 @@ describe('BarzanoPay', () => {
         }),
       }),
     );
+    const request = fetchFn.mock.calls[0]?.[1];
+    expect(JSON.parse(String(request?.body))).toMatchObject({
+      method: 'PIX', expiresIn: 1800, payer: { email: 'cliente@example.com' },
+    });
+    expect(String(request?.body)).not.toContain('customer');
+  });
+
+  it('converts the legacy customer field to the canonical payer field', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ id: 'pay_1' }), { status: 201 }),
+    );
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
+    await client.payments.create(
+      {
+        externalId: 'order_legacy', storeId: 'store_1', amount: 200, method: 'PIX',
+        customer: { name: 'Cliente', email: 'cliente@example.com', taxId: '52998224725' },
+      },
+      { idempotencyKey: 'order_legacy-v1' },
+    );
+    const request = fetchFn.mock.calls[0]?.[1];
+    expect(JSON.parse(String(request?.body))).toMatchObject({
+      payer: { name: 'Cliente', email: 'cliente@example.com' },
+    });
+    expect(String(request?.body)).not.toContain('customer');
   });
 
   it('exposes typed API errors and requestId', async () => {
