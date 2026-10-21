@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-import type { BarzanoAnyWebhookEvent, BarzanoWebhookEvent } from './types.js';
+import type { AnyWebhookEvent, WebhookEvent } from './types.js';
 
 export interface VerifyWebhookInput {
   payload: string | Uint8Array;
@@ -17,9 +17,13 @@ function bytes(value: string): Buffer {
   return Buffer.from(normalized, 'hex');
 }
 
-export function verifyWebhook(input: VerifyWebhookInput): BarzanoAnyWebhookEvent;
-export function verifyWebhook<T>(input: VerifyWebhookInput): BarzanoWebhookEvent<T>;
-export function verifyWebhook<T>(input: VerifyWebhookInput): BarzanoWebhookEvent<T> {
+export function verifyWebhook(input: VerifyWebhookInput): AnyWebhookEvent;
+export function verifyWebhook<TType extends string, TData>(
+  input: VerifyWebhookInput,
+): WebhookEvent<TType, TData>;
+export function verifyWebhook<TType extends string, TData>(
+  input: VerifyWebhookInput,
+): WebhookEvent<TType, TData> {
   const payload =
     typeof input.payload === 'string' ? input.payload : Buffer.from(input.payload).toString('utf8');
   const timestampSeconds = Number(input.timestamp);
@@ -39,5 +43,5 @@ export function verifyWebhook<T>(input: VerifyWebhookInput): BarzanoWebhookEvent
     throw new Error('Invalid webhook signature.');
   }
 
-  return JSON.parse(payload) as BarzanoWebhookEvent<T>;
+  return JSON.parse(payload) as WebhookEvent<TType, TData>;
 }

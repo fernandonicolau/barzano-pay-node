@@ -83,6 +83,44 @@ const payment = await barzano.payments.create(
 console.log(payment.pix?.copyAndPaste);
 ```
 
+Os contratos públicos podem ser importados junto com o cliente. Assim, o TypeScript avisa quando
+um campo obrigatório muda e o editor sinaliza aliases antigos com `@deprecated`:
+
+```ts
+import {
+  BarzanoPay,
+  type CreatePaymentInput,
+  type PaymentResponse,
+  type AnyWebhookEvent,
+  type PaymentWebhookEvent,
+} from '@barzano/pay';
+
+const input: CreatePaymentInput = {
+  externalId: 'pedido-123',
+  storeId: 'sua-store-id',
+  amount: 200,
+  currency: 'BRL',
+  method: 'PIX',
+  expiresIn: 1800,
+  payer: {
+    name: 'Cliente Teste',
+    email: 'cliente@example.com',
+    taxId: '52998224725',
+  },
+};
+
+const payment: PaymentResponse = await barzano.payments.create(
+  input,
+  { idempotencyKey: 'pedido-123-v1' },
+);
+```
+
+`CreatePaymentInput` valida os detalhes de cada método: boleto exige `boleto`, cartão exige
+`creditCard` e PIX não aceita esses blocos. `PaymentResponse` tipa a resposta normalizada;
+`AnyWebhookEvent` e `PaymentWebhookEvent` tipam os eventos recebidos. Os nomes antigos
+`Customer`, `Payment` e os tipos iniciados por `Barzano` continuam exportados com
+`@deprecated` durante a migração.
+
 O SDK usa o contrato público `POST /api/v1/payments`. Nesse contrato, envie `method`, `payer` e,
 para definir a validade do PIX, `expiresIn` em segundos. O endpoint `/api/v1/charges` existe apenas
 para integrações antigas e usa `paymentMethod`; não misture os dois formatos. As versões antigas do

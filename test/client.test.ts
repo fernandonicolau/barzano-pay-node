@@ -17,6 +17,7 @@ describe('BarzanoPay', () => {
         externalId: 'order_1',
         storeId: 'store_1',
         amount: 200,
+        currency: 'BRL',
         method: 'PIX',
         expiresIn: 1800,
         payer: { name: 'Cliente Teste', email: 'cliente@example.com', taxId: '52998224725' },
@@ -49,7 +50,7 @@ describe('BarzanoPay', () => {
     const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
     await client.payments.create(
       {
-        externalId: 'order_legacy', storeId: 'store_1', amount: 200, method: 'PIX',
+        externalId: 'order_legacy', storeId: 'store_1', amount: 200, currency: 'BRL', method: 'PIX',
         customer: { name: 'Cliente', email: 'cliente@example.com', taxId: '52998224725' },
       },
       { idempotencyKey: 'order_legacy-v1' },

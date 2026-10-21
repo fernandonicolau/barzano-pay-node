@@ -12,6 +12,7 @@ const payment = await client.payments.create({
   storeId: process.env.BARZANO_STORE_ID,
   amount: 200,
   currency: 'BRL',
+  currency: 'BRL',
   method: 'PIX',
   expiresIn: 1800,
   payer: { name: 'Cliente Teste', email: 'cliente@example.com', taxId: '52998224725' },

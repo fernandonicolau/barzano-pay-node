@@ -1,52 +1,73 @@
 export type BarzanoEnvironment = 'sandbox' | 'production';
 export type PaymentMethod = 'PIX' | 'BOLETO' | 'CREDIT_CARD';
 export type PaymentStatus =
-  | 'CREATED'
-  | 'PROCESSING'
-  | 'WAITING_PAYMENT'
-  | 'AUTHORIZED'
-  | 'PAID'
-  | 'FAILED'
-  | 'CANCELED'
-  | 'CANCELLED'
-  | 'REFUNDED'
-  | 'PARTIALLY_REFUNDED'
-  | 'EXPIRED';
+  | 'CREATED' | 'PROCESSING' | 'WAITING_PAYMENT' | 'PAID' | 'FAILED'
+  | 'CANCELED' | 'REFUNDED' | 'PARTIALLY_REFUNDED' | 'EXPIRED';
 
 export interface Payer {
   name: string;
   email: string;
+  /** CPF (11 digits) or CNPJ (14 digits), without punctuation. */
   taxId: string;
 }
 
-export interface CreatePaymentInput {
+export interface PaymentAddress {
+  street: string;
+  number: string;
+  locality: string;
+  city: string;
+  region: string;
+  regionCode: string;
+  country: string;
+  postalCode: string;
+}
+
+export interface BoletoOptions {
+  /** Due date in YYYY-MM-DD format. */
+  dueDate: string;
+  holderAddress: PaymentAddress;
+}
+
+export interface CreditCardOptions {
+  encrypted?: string;
+  token?: string;
+  savedPaymentMethodId?: string;
+  installments?: number;
+  save?: boolean;
+}
+
+interface CreatePaymentBase {
   externalId: string;
   storeId: string;
   amount: number;
-  currency?: 'BRL';
-  method: PaymentMethod;
+  currency: 'BRL';
   description?: string;
-  /** PIX expiration in seconds (1 to 2,592,000). */
+  /** Expiration in seconds (1 to 2,592,000). */
   expiresIn?: number;
-  /** Buyer data sent to the payment provider. */
   payer: Payer;
   providerCode?: string;
+  paymentAccountReference?: string;
   metadata?: Record<string, unknown>;
-  [key: string]: unknown;
 }
+
+export type CreatePaymentInput =
+  | (CreatePaymentBase & { method: 'PIX'; boleto?: never; creditCard?: never })
+  | (CreatePaymentBase & { method: 'BOLETO'; boleto: BoletoOptions; creditCard?: never })
+  | (CreatePaymentBase & { method: 'CREDIT_CARD'; creditCard: CreditCardOptions; boleto?: never });
 
 /** @deprecated Use Payer. */
 export type Customer = Payer;
 
-/** Compatibility shape accepted by SDK versions 0.1.x and 0.2.1. */
-export interface LegacyCreatePaymentInput extends Omit<CreatePaymentInput, 'payer' | 'expiresIn'> {
-  /** @deprecated Use payer. */
+/** @deprecated Use CreatePaymentInput with payer and expiresIn. */
+export type LegacyCreatePaymentInput = Omit<CreatePaymentBase, 'payer' | 'expiresIn'> & {
+  method: PaymentMethod;
   customer: Customer;
-  /** @deprecated Use expiresIn. The SDK converts this instant to seconds. */
   expiresAt?: string;
-  payer?: never;
   expiresIn?: number;
-}
+  payer?: never;
+  boleto?: BoletoOptions;
+  creditCard?: CreditCardOptions;
+};
 
 export type CreatePaymentRequest = CreatePaymentInput | LegacyCreatePaymentInput;
 
@@ -64,71 +85,85 @@ export interface ListPaymentsOptions {
   signal?: AbortSignal;
 }
 
-export interface PaymentInstructions {
-  type: PaymentMethod;
-  copyAndPaste?: string;
-  qrCode?: string;
-  expiresAt?: string;
-  barcode?: string;
-  digitableLine?: string;
-  documentUrl?: string;
+export interface PixPaymentInstructions {
+  type: 'PIX';
+  copyAndPaste: string;
+  qrCode: string;
+  expiresAt: string | null;
 }
 
-export interface Payment {
+export interface BoletoPaymentInstructions {
+  type: 'BOLETO';
+  barcode: string;
+  digitableLine: string;
+  documentUrl: string;
+  dueDate: string | null;
+}
+
+export interface CardPaymentInstructions {
+  type: 'CARD';
+  authorizationCode: string | null;
+}
+
+export type PaymentInstructions =
+  | PixPaymentInstructions
+  | BoletoPaymentInstructions
+  | CardPaymentInstructions;
+
+export interface PaymentProviderResponse {
+  code: string;
+  name: string;
+  chargeId: string | null;
+  referenceId: string | null;
+  status: string | null;
+}
+
+export type PaymentNextAction =
+  | { type: 'NONE' }
+  | { type: 'DISPLAY_QR_CODE'; qrCode: string; qrCodeImageUrl: string; expiresAt: string | null }
+  | {
+      type: 'DISPLAY_BOLETO';
+      barcode: string;
+      digitableLine: string;
+      documentUrl: string;
+      expiresAt: string | null;
+    };
+
+export interface PaymentResponse {
   id: string;
-  chargeId?: string;
+  /** @deprecated Use id. Kept while the legacy charge contract is supported. */
+  chargeId: string;
   externalId: string;
-  storeId?: string;
-  paymentAccountId?: string | null;
   status: PaymentStatus;
   amount: number;
-  currency: string;
-  method?: PaymentMethod;
-  paymentMethod?: PaymentMethod;
-  expiresAt?: string | null;
-  pix?: { copyAndPaste: string; qrCode: string } | null;
-  paymentInstructions?: PaymentInstructions | null;
-  provider?: {
-    code?: string;
-    name?: string;
-    chargeId?: string | null;
-    referenceId?: string | null;
-    status?: string | null;
-  } | null;
-  nextAction?: Record<string, unknown> | null;
-  createdAt?: string;
-  updatedAt?: string;
-  [key: string]: unknown;
+  currency: 'BRL';
+  method: PaymentMethod;
+  /** @deprecated Use method. */
+  paymentMethod: PaymentMethod;
+  expiresAt: string | null;
+  pix: { copyAndPaste: string; qrCode: string } | null;
+  paymentInstructions: PaymentInstructions | null;
+  provider: PaymentProviderResponse;
+  nextAction: PaymentNextAction;
 }
 
-export type BarzanoWebhookEventType =
-  | 'charge.paid'
-  | 'charge.expired'
-  | 'charge.failed'
-  | 'webhook.test';
+/** @deprecated Use PaymentResponse. */
+export type Payment = PaymentResponse;
 
-export interface BarzanoChargeWebhookData {
+export type FinancialWebhookEventType = 'charge.paid' | 'charge.expired' | 'charge.failed';
+export type WebhookEventType = FinancialWebhookEventType | 'webhook.test';
+
+export interface PaymentWebhookData {
   chargeId: string;
   externalId: string;
   storeExternalId: string | null;
   amount: number;
-  currency: string;
+  currency: 'BRL';
   status: PaymentStatus;
   paidAt: string | null;
 }
 
-export interface BarzanoWebhookEvent<T = BarzanoChargeWebhookData> {
-  id: string;
-  type: BarzanoWebhookEventType;
-  createdAt: string;
-  data: T;
-}
-
-export type BarzanoChargeWebhookEvent = BarzanoWebhookEvent<BarzanoChargeWebhookData> & {
-  type: Exclude<BarzanoWebhookEventType, 'webhook.test'>;
-};
-
-export interface BarzanoTestWebhookData {
+export interface TestWebhookData {
   chargeId: null;
   externalId: string;
   storeExternalId: null;
@@ -138,8 +173,28 @@ export interface BarzanoTestWebhookData {
   paidAt: null;
 }
 
-export type BarzanoTestWebhookEvent = BarzanoWebhookEvent<BarzanoTestWebhookData> & {
-  type: 'webhook.test';
-};
+export interface WebhookEvent<TType extends string, TData> {
+  id: string;
+  type: TType;
+  createdAt: string;
+  data: TData;
+}
 
-export type BarzanoAnyWebhookEvent = BarzanoChargeWebhookEvent | BarzanoTestWebhookEvent;
+export type PaymentWebhookEvent = WebhookEvent<FinancialWebhookEventType, PaymentWebhookData>;
+export type TestWebhookEvent = WebhookEvent<'webhook.test', TestWebhookData>;
+export type AnyWebhookEvent = PaymentWebhookEvent | TestWebhookEvent;
+
+/** @deprecated Use WebhookEvent. */
+export type BarzanoWebhookEvent<T = PaymentWebhookData> = WebhookEvent<WebhookEventType, T>;
+/** @deprecated Use WebhookEventType. */
+export type BarzanoWebhookEventType = WebhookEventType;
+/** @deprecated Use PaymentWebhookData. */
+export type BarzanoChargeWebhookData = PaymentWebhookData;
+/** @deprecated Use PaymentWebhookEvent. */
+export type BarzanoChargeWebhookEvent = PaymentWebhookEvent;
+/** @deprecated Use TestWebhookData. */
+export type BarzanoTestWebhookData = TestWebhookData;
+/** @deprecated Use TestWebhookEvent. */
+export type BarzanoTestWebhookEvent = TestWebhookEvent;
+/** @deprecated Use AnyWebhookEvent. */
+export type BarzanoAnyWebhookEvent = AnyWebhookEvent;

@@ -4,7 +4,7 @@ import type {
   CreatePaymentRequest,
   CreatePaymentOptions,
   ListPaymentsOptions,
-  Payment,
+  PaymentResponse,
 } from './types.js';
 import type { ProviderCatalogEntry } from './onboarding-api.js';
 
@@ -39,9 +39,9 @@ const URLS: Record<BarzanoEnvironment, string> = {
 
 export class BarzanoPay {
   readonly payments: {
-    create: (input: CreatePaymentRequest, options: CreatePaymentOptions) => Promise<Payment>;
-    retrieve: (paymentId: string, signal?: AbortSignal) => Promise<Payment>;
-    list: (options?: ListPaymentsOptions | string, signal?: AbortSignal) => Promise<Payment[]>;
+    create: (input: CreatePaymentRequest, options: CreatePaymentOptions) => Promise<PaymentResponse>;
+    retrieve: (paymentId: string, signal?: AbortSignal) => Promise<PaymentResponse>;
+    list: (options?: ListPaymentsOptions | string, signal?: AbortSignal) => Promise<PaymentResponse[]>;
   };
   readonly providers: {
     list: (signal?: AbortSignal) => Promise<ProviderCatalogEntry[]>;
@@ -64,14 +64,14 @@ export class BarzanoPay {
 
     this.payments = {
       create: (input, requestOptions) =>
-        this.request<Payment>('/api/v1/payments', {
+        this.request<PaymentResponse>('/api/v1/payments', {
           method: 'POST',
           body: this.normalizePaymentInput(input),
           ...(requestOptions.signal ? { signal: requestOptions.signal } : {}),
           headers: { 'Idempotency-Key': requestOptions.idempotencyKey },
         }),
       retrieve: (paymentId, signal) =>
-        this.request<Payment>(`/api/v1/payments/${encodeURIComponent(paymentId)}`, {
+        this.request<PaymentResponse>(`/api/v1/payments/${encodeURIComponent(paymentId)}`, {
           ...(signal ? { signal } : {}),
         }),
       list: (options = {}, legacySignal) => {
@@ -84,7 +84,7 @@ export class BarzanoPay {
           if (value) params.set(key, value);
         }
         const query = params.toString();
-        return this.request<Payment[]>(`/api/v1/payments${query ? `?${query}` : ''}`, {
+        return this.request<PaymentResponse[]>(`/api/v1/payments${query ? `?${query}` : ''}`, {
           ...(filters.signal ? { signal: filters.signal } : {}),
         });
       },
