@@ -117,5 +117,5 @@ if (payment.nextAction.type === 'DISPLAY_BOLETO') {
 }
 ```
 
-O CPF/CNPJ e o e-mail do pagador precisam identificar o comprador e ser diferentes dos dados do
+O CPF/CNPJ precisa ser matematicamente válido. O documento e o e-mail do pagador precisam identificar o comprador e ser diferentes dos dados do
 estabelecimento e do titular da conta no provider.
