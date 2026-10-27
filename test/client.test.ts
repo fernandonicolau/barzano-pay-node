@@ -62,6 +62,34 @@ describe('BarzanoPay', () => {
     expect(String(request?.body)).not.toContain('customer');
   });
 
+  it('forwards provider and exact payment account selection without provider-specific payloads', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ id: 'pay_1' }), { status: 201 }),
+    );
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
+    await client.payments.create(
+      {
+        externalId: 'order_routed',
+        storeId: 'store_1',
+        amount: 200,
+        currency: 'BRL',
+        method: 'PIX',
+        providerCode: 'MERCADO_PAGO',
+        paymentAccountReference: '77c01736-9637-4236-9a7d-5c605c3770b1',
+        payer: { name: 'Cliente', email: 'cliente@example.com', taxId: '52998224725' },
+      },
+      { idempotencyKey: 'order_routed-v1' },
+    );
+    const body = JSON.parse(String(fetchFn.mock.calls[0]?.[1]?.body));
+    expect(body).toMatchObject({
+      providerCode: 'MERCADO_PAGO',
+      paymentAccountReference: '77c01736-9637-4236-9a7d-5c605c3770b1',
+      method: 'PIX',
+    });
+    expect(body).not.toHaveProperty('accessToken');
+    expect(body).not.toHaveProperty('credentials');
+  });
+
   it('exposes typed API errors and requestId', async () => {
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
       new Response(

@@ -31,8 +31,10 @@ for (const provider of providers) {
 }
 ```
 
-Hoje o primeiro adapter é o **PagBank**. As capabilities retornadas informam se a configuração
-disponível aceita PIX, boleto, cartão, reembolso e outros recursos.
+O catálogo publica somente adapters disponíveis no ambiente da sua conta. PagBank, Mercado Pago e
+Asaas podem processar PIX conforme as contas financeiras ativas; a Stone permanece fora do catálogo
+até concluir a homologação externa. As capabilities informam se cada configuração aceita PIX,
+boleto, cartão, reembolso e outros recursos.
 
 ## Configuração assistida
 
@@ -123,6 +125,33 @@ const payment: PaymentResponse = await barzano.payments.create(
   { idempotencyKey: 'pedido-123-v1' },
 );
 ```
+
+Sem `providerCode` ou `paymentAccountReference`, a API usa a conta principal elegível da loja no
+mesmo ambiente da integration key. Para escolher um provider, envie o código retornado por
+`barzano.providers.list()`. Para escolher uma conta específica, envie sua referência:
+
+```ts
+const payment = await barzano.payments.create(
+  {
+    externalId: 'pedido-124',
+    storeId: 'sua-store-id',
+    amount: 200,
+    currency: 'BRL',
+    method: 'PIX',
+    providerCode: 'MERCADO_PAGO',
+    // Alternativa mais específica: paymentAccountReference: 'uuid-da-conta-financeira',
+    payer: {
+      name: 'Cliente Teste',
+      email: 'cliente@example.com',
+      taxId: '52998224725',
+    },
+  },
+  { idempotencyKey: 'pedido-124-v1' },
+);
+```
+
+A seleção é estrita. Uma conta incompatível, inativa ou de outro ambiente retorna erro; a Barzano
+Pay não troca silenciosamente para outro banco.
 
 `CreatePaymentInput` valida os detalhes de cada método: boleto exige `boleto`, cartão exige
 `creditCard` e PIX não aceita esses blocos. `PaymentResponse` tipa a resposta normalizada;

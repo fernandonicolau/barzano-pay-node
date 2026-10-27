@@ -45,7 +45,9 @@ interface CreatePaymentBase {
   /** Expiration in seconds (1 to 2,592,000). */
   expiresIn?: number;
   payer: Payer;
+  /** Provider returned by providers.list(). Omit to use the primary eligible account. */
   providerCode?: string;
+  /** Exact payment account reference. Takes precedence over automatic account routing. */
   paymentAccountReference?: string;
   metadata?: Record<string, unknown>;
 }

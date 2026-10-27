@@ -40,6 +40,8 @@
     "payments",
     "pix",
     "pagbank",
+    "mercado-pago",
+    "asaas",
     "typescript",
     "sdk"
   ],

@@ -28,6 +28,42 @@ const payment: PaymentResponse = await barzano.payments.create(
 );
 ```
 
+### Selecionar provider ou conta financeira
+
+O payload financeiro permanece igual para todos os providers. Descubra os providers habilitados e
+use o código retornado pelo catálogo:
+
+```ts
+const providers = await barzano.providers.list();
+const mercadoPago = providers.find((provider) => provider.provider === 'MERCADO_PAGO');
+
+if (!mercadoPago?.capabilities.supportedPaymentMethods.includes('PIX')) {
+  throw new Error('Mercado Pago PIX não está disponível nesta conta.');
+}
+
+const input: CreatePaymentInput = {
+  storeId: 'uuid-da-loja',
+  externalId: 'pedido-123-mercado-pago',
+  amount: 4090,
+  currency: 'BRL',
+  method: 'PIX',
+  providerCode: mercadoPago.provider,
+  payer: {
+    name: 'José da Silva',
+    email: 'jose@example.com',
+    taxId: '52998224725',
+  },
+};
+```
+
+- omita os dois campos para usar a conta principal elegível da loja;
+- use `providerCode` para selecionar uma conta ativa daquele provider;
+- use `paymentAccountReference` para selecionar exatamente uma conta financeira;
+- não envie configuração, token ou payload específico do banco na cobrança;
+- a API nunca faz fallback silencioso quando a seleção explícita é inválida.
+
+O ambiente vem da integration key. Uma chave Sandbox nunca seleciona conta de Produção e vice-versa.
+
 ## Boleto
 
 ```ts
