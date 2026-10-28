@@ -159,6 +159,18 @@ Pay não troca silenciosamente para outro banco.
 `Customer`, `Payment` e os tipos iniciados por `Barzano` continuam exportados com
 `@deprecated` durante a migração.
 
+## Consultar, sincronizar e cancelar
+
+```ts
+const current = await barzano.payments.retrieve(payment.id);
+const synchronized = await barzano.payments.sync(payment.id);
+const canceled = await barzano.payments.cancel(payment.id);
+```
+
+`retrieve` lê o estado persistido; `sync` consulta o provider e atualiza o pagamento; `cancel`
+encerra somente pagamentos ainda não pagos. Todas as operações retornam `PaymentResponse` e erros
+mantêm `code`, status HTTP e `requestId`.
+
 O SDK usa o contrato público `POST /api/v1/payments`. Nesse contrato, envie `method`, `payer` e,
 para definir a validade do PIX, `expiresIn` em segundos. O endpoint `/api/v1/charges` existe apenas
 para integrações antigas e usa `paymentMethod`; não misture os dois formatos. As versões antigas do

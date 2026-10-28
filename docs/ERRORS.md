@@ -37,10 +37,16 @@ estáveis, independentemente do banco selecionado:
 | `PAYMENT_PROVIDER_CONFIGURATION_ERROR`     |  503 | Revise a conta e as credenciais do provider no painel.           |
 | `PAYMENT_PROVIDER_TEMPORARILY_UNAVAILABLE` |  503 | Tente novamente mais tarde usando a mesma chave e o mesmo corpo. |
 | `IDEMPOTENCY_KEY_REUSED`                   |  409 | Use uma nova chave quando alterar qualquer campo do pagamento.   |
+| `PAID_CHARGE_CANNOT_BE_CANCELED`           |  409 | O pagamento já foi pago; não repita o cancelamento.              |
+| `CANCEL_TIMEOUT_RECONCILIATION_REQUIRED`   |  504 | Consulte ou sincronize o mesmo pagamento antes de tentar de novo.|
 
 Por exemplo, documento inválido no PagBank, Mercado Pago ou outro provider sempre resulta em
 `INVALID_PAYER_DOCUMENT`. O código original permanece somente no diagnóstico interno da Barzano
 Pay.
+
+No timeout de cancelamento, não crie outro pagamento nem altere o ID. A API já executa uma
+reconciliação segura e o SDK preserva `code` e `requestId` para a aplicação consultar o estado e
+acionar o suporte quando necessário.
 
 ## Idempotência
 

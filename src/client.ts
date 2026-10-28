@@ -41,6 +41,8 @@ export class BarzanoPay {
   readonly payments: {
     create: (input: CreatePaymentRequest, options: CreatePaymentOptions) => Promise<PaymentResponse>;
     retrieve: (paymentId: string, signal?: AbortSignal) => Promise<PaymentResponse>;
+    sync: (paymentId: string, signal?: AbortSignal) => Promise<PaymentResponse>;
+    cancel: (paymentId: string, signal?: AbortSignal) => Promise<PaymentResponse>;
     list: (options?: ListPaymentsOptions | string, signal?: AbortSignal) => Promise<PaymentResponse[]>;
   };
   readonly providers: {
@@ -72,6 +74,16 @@ export class BarzanoPay {
         }),
       retrieve: (paymentId, signal) =>
         this.request<PaymentResponse>(`/api/v1/payments/${encodeURIComponent(paymentId)}`, {
+          ...(signal ? { signal } : {}),
+        }),
+      sync: (paymentId, signal) =>
+        this.request<PaymentResponse>(`/api/v1/payments/${encodeURIComponent(paymentId)}/sync`, {
+          method: 'POST',
+          ...(signal ? { signal } : {}),
+        }),
+      cancel: (paymentId, signal) =>
+        this.request<PaymentResponse>(`/api/v1/payments/${encodeURIComponent(paymentId)}/cancel`, {
+          method: 'POST',
           ...(signal ? { signal } : {}),
         }),
       list: (options = {}, legacySignal) => {

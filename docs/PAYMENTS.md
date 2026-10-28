@@ -124,10 +124,16 @@ const payment = await barzano.payments.create(
 );
 ```
 
-## Consultar e listar
+## Consultar, sincronizar, cancelar e listar
 
 ```ts
 const payment = await barzano.payments.retrieve('payment-id');
+
+// Consulta o provider e persiste o estado mais recente antes de responder.
+const synchronized = await barzano.payments.sync('payment-id');
+
+// Cancela uma cobrança ainda não paga e devolve o estado normalizado.
+const canceled = await barzano.payments.cancel('payment-id');
 
 const payments = await barzano.payments.list({
   storeId: 'uuid-da-loja',
@@ -137,6 +143,14 @@ const payments = await barzano.payments.list({
   providerCode: 'PAGBANK',
 });
 ```
+
+`retrieve` lê o estado persistido na Barzano Pay. Use `sync` quando precisar reconciliar
+imediatamente com o provider; webhooks continuam sendo a fonte principal das atualizações.
+
+O cancelamento é permitido somente enquanto o pagamento não tiver sido pago. Se a resposta for
+`CANCEL_TIMEOUT_RECONCILIATION_REQUIRED`, a Barzano Pay já consultou o provider antes de encerrar a
+requisição e não enviou uma segunda ordem de cancelamento. Consulte `retrieve` e, se necessário,
+execute `sync` com o mesmo ID antes de decidir a próxima ação.
 
 ## Resposta
 

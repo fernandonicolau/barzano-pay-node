@@ -4,6 +4,11 @@ export type PaymentStatus =
   | 'CREATED' | 'PROCESSING' | 'WAITING_PAYMENT' | 'PAID' | 'FAILED'
   | 'CANCELED' | 'REFUNDED' | 'PARTIALLY_REFUNDED' | 'EXPIRED';
 
+/** Stable public error codes returned by payment cancellation. */
+export type PaymentCancellationErrorCode =
+  | 'PAID_CHARGE_CANNOT_BE_CANCELED'
+  | 'CANCEL_TIMEOUT_RECONCILIATION_REQUIRED';
+
 export interface Payer {
   name: string;
   email: string;

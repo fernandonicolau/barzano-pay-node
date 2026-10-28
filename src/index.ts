@@ -33,6 +33,7 @@ export type {
   FinancialWebhookEventType,
   Payer,
   PaymentAddress,
+  PaymentCancellationErrorCode,
   Payment,
   PaymentNextAction,
   PaymentProviderResponse,

@@ -148,6 +148,46 @@ describe('BarzanoPay', () => {
     );
   });
 
+  it('synchronizes and cancels payments through the recommended public resource', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockImplementation(async () =>
+      new Response(JSON.stringify({ id: 'pay/1', status: 'CANCELED' }), { status: 200 }),
+    );
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
+
+    await client.payments.sync('pay/1');
+    await client.payments.cancel('pay/1');
+
+    expect(fetchFn).toHaveBeenNthCalledWith(
+      1,
+      'https://pay.barzano.com.br/api/v1/payments/pay%2F1/sync',
+      expect.objectContaining({ method: 'POST' }),
+    );
+    expect(fetchFn).toHaveBeenNthCalledWith(
+      2,
+      'https://pay.barzano.com.br/api/v1/payments/pay%2F1/cancel',
+      expect.objectContaining({ method: 'POST' }),
+    );
+  });
+
+  it.each([
+    ['PAID_CHARGE_CANNOT_BE_CANCELED', 409],
+    ['CANCEL_TIMEOUT_RECONCILIATION_REQUIRED', 504],
+  ])('preserves cancellation code %s and requestId', async (code, status) => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(
+        JSON.stringify({ error: { code, message: 'Cancellation failed.', requestId: 'req_cancel' } }),
+        { status },
+      ),
+    );
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
+
+    await expect(client.payments.cancel('pay_1')).rejects.toMatchObject({
+      code,
+      status,
+      requestId: 'req_cancel',
+    });
+  });
+
   it('discovers providers and payment methods supported by the account', async () => {
     const catalog = [{ provider: 'PAGBANK', displayName: 'PagBank', capabilities: { supportedPaymentMethods: ['PIX'] } }];
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
