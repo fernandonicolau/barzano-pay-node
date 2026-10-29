@@ -100,6 +100,9 @@ const payment = await barzano.payments.create(
 ## Cartão
 
 O cartão deve chegar tokenizado ou criptografado pelo provider. Não envie PAN ou CVV em texto puro.
+No PagBank, gere `encrypted` no navegador com o SDK oficial e a chave pública da conta. O valor é
+de uso único e deve ser enviado imediatamente à Barzano Pay. A integration key da Barzano e o token
+da conta PagBank permanecem somente no servidor.
 
 ```ts
 const payment = await barzano.payments.create(
@@ -115,14 +118,19 @@ const payment = await barzano.payments.create(
       taxId: '52998224725',
     },
     creditCard: {
-      token: 'token-seguro-do-provider',
-      installments: 1,
-      save: false,
+      encrypted: 'cartao-criptografado-no-navegador',
+      installments: 2,
+      save: true,
     },
   },
   { idempotencyKey: 'pedido-125-v1' },
 );
 ```
+
+Quando `save` for `true`, a resposta aprovada pode criar um meio de pagamento salvo. Use o
+`savedPaymentMethodId` retornado pela Barzano nas cobranças seguintes; não persista o valor
+`encrypted`, pois ele não pode ser reutilizado. Também é possível enviar um `token` emitido pelo
+provider quando o seu fluxo já possuir um token seguro.
 
 ## Consultar, sincronizar, cancelar, reembolsar e listar
 

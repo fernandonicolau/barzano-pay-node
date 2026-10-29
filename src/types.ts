@@ -34,10 +34,14 @@ export interface BoletoOptions {
 }
 
 export interface CreditCardOptions {
+  /** Single-use card ciphertext created in the payer's browser by the provider SDK. */
   encrypted?: string;
+  /** Provider card token. Never send PAN or CVV in this field. */
   token?: string;
+  /** Barzano Pay saved payment method identifier returned by a previous payment. */
   savedPaymentMethodId?: string;
   installments?: number;
+  /** Requests provider tokenization after an encrypted-card payment. */
   save?: boolean;
 }
 
