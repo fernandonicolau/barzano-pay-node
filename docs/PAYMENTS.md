@@ -160,8 +160,20 @@ O cancelamento é permitido somente enquanto o pagamento não tiver sido pago. S
 requisição e não enviou uma segunda ordem de cancelamento. Consulte `retrieve` e, se necessário,
 execute `sync` com o mesmo ID antes de decidir a próxima ação.
 
+## Estado de cancelamentos e reembolsos
+
+```ts
+const operations = await barzano.payments.listOperations('payment-id');
+const operation = await barzano.payments.retrieveOperation('payment-id', operations[0].id);
+```
+
+O estado canônico pode ser `PROCESSING`, `SUCCEEDED`, `FAILED` ou
+`REQUIRES_RECONCILIATION`. Consulte a mesma operação em vez de enviar novamente uma solicitação
+monetária quando o resultado ainda não for conclusivo.
+
 O reembolso integral é idempotente e só é aceito para pagamentos com status `PAID` em providers
-que anunciam `supportsRefund`. Reembolso parcial permanece fora deste contrato.
+que anunciam `supportsRefund`. Reembolso parcial exige valor inteiro em centavos, Idempotency-Key e
+capability `supportsPartialRefund`.
 
 ## Resposta
 

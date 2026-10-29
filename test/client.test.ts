@@ -193,6 +193,35 @@ describe('BarzanoPay', () => {
     );
   });
 
+  it('lists and retrieves canonical payment operations', async () => {
+    const operation = {
+      id: 'operation/1',
+      paymentId: 'pay/1',
+      type: 'REFUND',
+      status: 'PROCESSING',
+    };
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response(JSON.stringify([operation]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(operation), { status: 200 }));
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
+
+    await expect(client.payments.listOperations('pay/1')).resolves.toEqual([operation]);
+    await expect(client.payments.retrieveOperation('pay/1', 'operation/1')).resolves.toEqual(
+      operation,
+    );
+    expect(fetchFn).toHaveBeenNthCalledWith(
+      1,
+      'https://pay.barzano.com.br/api/v1/payments/pay%2F1/operations',
+      expect.any(Object),
+    );
+    expect(fetchFn).toHaveBeenNthCalledWith(
+      2,
+      'https://pay.barzano.com.br/api/v1/payments/pay%2F1/operations/operation%2F1',
+      expect.any(Object),
+    );
+  });
+
   it('requires an idempotency key for a partial refund', () => {
     const client = new BarzanoPay({
       apiKey: 'pay_test_secret',

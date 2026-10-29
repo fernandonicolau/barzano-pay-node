@@ -4,6 +4,7 @@ import type {
   CreatePaymentRequest,
   CreatePaymentOptions,
   ListPaymentsOptions,
+  PaymentOperation,
   PaymentResponse,
   RefundPaymentOptions,
 } from './types.js';
@@ -52,6 +53,12 @@ export class BarzanoPay {
       paymentId: string,
       options?: RefundPaymentOptions | AbortSignal,
     ) => Promise<PaymentResponse>;
+    listOperations: (paymentId: string, signal?: AbortSignal) => Promise<PaymentOperation[]>;
+    retrieveOperation: (
+      paymentId: string,
+      operationId: string,
+      signal?: AbortSignal,
+    ) => Promise<PaymentOperation>;
     list: (options?: ListPaymentsOptions | string, signal?: AbortSignal) => Promise<PaymentResponse[]>;
   };
   readonly providers: {
@@ -120,6 +127,16 @@ export class BarzanoPay {
           },
         );
       },
+      listOperations: (paymentId, signal) =>
+        this.request<PaymentOperation[]>(
+          `/api/v1/payments/${encodeURIComponent(paymentId)}/operations`,
+          { ...(signal ? { signal } : {}) },
+        ),
+      retrieveOperation: (paymentId, operationId, signal) =>
+        this.request<PaymentOperation>(
+          `/api/v1/payments/${encodeURIComponent(paymentId)}/operations/${encodeURIComponent(operationId)}`,
+          { ...(signal ? { signal } : {}) },
+        ),
       list: (options = {}, legacySignal) => {
         const filters: ListPaymentsOptions = typeof options === 'string'
           ? { externalId: options, ...(legacySignal ? { signal: legacySignal } : {}) }

@@ -100,6 +100,29 @@ export interface RefundPaymentOptions {
   signal?: AbortSignal;
 }
 
+export type PaymentOperationType = 'CANCEL' | 'REFUND';
+export type PaymentOperationStatus =
+  | 'PROCESSING'
+  | 'SUCCEEDED'
+  | 'FAILED'
+  | 'REQUIRES_RECONCILIATION';
+
+export interface PaymentOperation {
+  id: string;
+  paymentId: string;
+  type: PaymentOperationType;
+  status: PaymentOperationStatus;
+  /** Operation value in cents. Null for cancellation. */
+  amount: number | null;
+  currency: 'BRL';
+  providerCode: string;
+  providerStatus: string | null;
+  errorCode: string | null;
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+}
+
 export interface PixPaymentInstructions {
   type: 'PIX';
   copyAndPaste: string;

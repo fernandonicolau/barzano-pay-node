@@ -170,12 +170,17 @@ const partiallyRefunded = await barzano.payments.refund(payment.id, {
   amount: 500,
   idempotencyKey: 'pedido-123-reembolso-500-v1',
 });
+
+const operations = await barzano.payments.listOperations(payment.id);
+const operation = await barzano.payments.retrieveOperation(payment.id, operations[0].id);
 ```
 
 `retrieve` lê o estado persistido; `sync` consulta o provider e atualiza o pagamento; `cancel`
 encerra somente pagamentos ainda não pagos. Todas as operações retornam `PaymentResponse` e erros
 mantêm `code`, status HTTP e `requestId`.
 `refund` devolve integralmente um pagamento pago quando o provider anuncia suporte.
+`listOperations` e `retrieveOperation` informam se cancelamentos e reembolsos estão em processamento,
+concluídos, falharam ou precisam de reconciliação, sem exigir conhecimento do provider.
 
 O SDK usa o contrato público `POST /api/v1/payments`. Nesse contrato, envie `method`, `payer` e,
 para definir a validade do PIX, `expiresIn` em segundos. O endpoint `/api/v1/charges` existe apenas
