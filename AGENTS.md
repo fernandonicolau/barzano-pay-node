@@ -12,3 +12,16 @@ Antes de executar uma task:
 
 O SDK expõe o contrato público e facilidades de integração. Regras financeiras, seleção de provider,
 idempotência persistida e autenticação humana pertencem ao backend.
+
+## Gate de sincronização do contrato
+
+Endpoint, DTO, enum, erro público ou autenticação alterados no backend exigem, na mesma task:
+
+1. conferir o OpenAPI publicado e a documentação em `/docs`;
+2. atualizar os tipos públicos e métodos do SDK sem inventar campos;
+3. atualizar exemplos, erros, migração e versão do pacote;
+4. adicionar teste que prove método, path, payload, resposta, código e `requestId` relevantes;
+5. executar `npm run check` e `npm pack --dry-run` antes de publicar.
+
+O SDK e `/docs` são projeções do OpenAPI do backend. Se qualquer uma divergir, a task permanece
+`PARTIAL` e a nova API não deve ser anunciada nem publicada como concluída.
