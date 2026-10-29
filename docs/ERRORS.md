@@ -69,3 +69,12 @@ const barzano = new BarzanoPay({
 ```
 
 O callback não recebe chave, payer ou corpo financeiro.
+
+## Reembolso parcial
+
+O SDK envia `amount` como inteiro em centavos e `Idempotency-Key` no cabecalho. A API pode retornar
+`PARTIALLY_REFUNDED`; uma nova devolucao parcial deve usar outra chave.
+
+Codigos estaveis relacionados: `IDEMPOTENCY_KEY_REQUIRED`,
+`PARTIAL_REFUND_AMOUNT_MUST_BE_LESS_THAN_PAYMENT`, `PARTIAL_REFUND_NOT_SUPPORTED` e
+`REFUND_TIMEOUT_RECONCILIATION_REQUIRED`.

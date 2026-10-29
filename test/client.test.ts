@@ -175,6 +175,35 @@ describe('BarzanoPay', () => {
     );
   });
 
+  it('sends a partial refund in cents with its idempotency key', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ id: 'pay_1', status: 'PARTIALLY_REFUNDED' }), { status: 200 }),
+    );
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
+
+    await client.payments.refund('pay_1', { amount: 500, idempotencyKey: 'refund-order-1-500' });
+
+    expect(fetchFn).toHaveBeenCalledWith(
+      'https://pay.barzano.com.br/api/v1/payments/pay_1/refund',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ amount: 500 }),
+        headers: expect.objectContaining({ 'Idempotency-Key': 'refund-order-1-500' }),
+      }),
+    );
+  });
+
+  it('requires an idempotency key for a partial refund', () => {
+    const client = new BarzanoPay({
+      apiKey: 'pay_test_secret',
+      fetch: vi.fn<typeof fetch>(),
+    });
+
+    expect(() => client.payments.refund('pay_1', { amount: 500 })).toThrow(
+      'idempotencyKey is required for partial refunds.',
+    );
+  });
+
   it.each([
     ['PAID_CHARGE_CANNOT_BE_CANCELED', 409],
     ['CANCEL_TIMEOUT_RECONCILIATION_REQUIRED', 504],

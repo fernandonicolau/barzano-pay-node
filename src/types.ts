@@ -92,6 +92,14 @@ export interface ListPaymentsOptions {
   signal?: AbortSignal;
 }
 
+export interface RefundPaymentOptions {
+  /** Partial refund value in cents. Omit for a full refund. */
+  amount?: number;
+  /** Required for partial refunds. Reuse it only when retrying the same logical refund. */
+  idempotencyKey?: string;
+  signal?: AbortSignal;
+}
+
 export interface PixPaymentInstructions {
   type: 'PIX';
   copyAndPaste: string;

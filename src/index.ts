@@ -38,6 +38,7 @@ export type {
   PaymentNextAction,
   PaymentProviderResponse,
   PaymentResponse,
+  RefundPaymentOptions,
   PaymentInstructions,
   PaymentMethod,
   PaymentStatus,

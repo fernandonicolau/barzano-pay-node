@@ -138,6 +138,11 @@ const canceled = await barzano.payments.cancel('payment-id');
 // Reembolsa integralmente uma cobrança paga.
 const refunded = await barzano.payments.refund('payment-id');
 
+const partiallyRefunded = await barzano.payments.refund('payment-id', {
+  amount: 500,
+  idempotencyKey: 'pedido-125-reembolso-500-v1',
+});
+
 const payments = await barzano.payments.list({
   storeId: 'uuid-da-loja',
   externalId: 'pedido-123',
@@ -175,3 +180,10 @@ if (payment.nextAction.type === 'DISPLAY_BOLETO') {
 
 O CPF/CNPJ precisa ser matematicamente válido. O documento e o e-mail do pagador precisam identificar o comprador e ser diferentes dos dados do
 estabelecimento e do titular da conta no provider.
+
+## Reembolso parcial
+
+Use `payments.refund(paymentId, { amount, idempotencyKey })`. `amount` e sempre um inteiro em
+centavos e deve ser menor que o valor original. A chave e obrigatoria e deve identificar a tentativa
+logica de devolucao; reutilize-a somente ao repetir exatamente o mesmo reembolso. Consulte
+`supportsPartialRefund` no catalogo antes de oferecer a operacao.

@@ -5,6 +5,7 @@ import type {
   CreatePaymentOptions,
   ListPaymentsOptions,
   PaymentResponse,
+  RefundPaymentOptions,
 } from './types.js';
 import type { ProviderCatalogEntry } from './onboarding-api.js';
 
@@ -37,13 +38,20 @@ const URLS: Record<BarzanoEnvironment, string> = {
   production: 'https://pay.barzano.com.br',
 };
 
+function isAbortSignal(value: RefundPaymentOptions | AbortSignal): value is AbortSignal {
+  return 'aborted' in value && typeof value.addEventListener === 'function';
+}
+
 export class BarzanoPay {
   readonly payments: {
     create: (input: CreatePaymentRequest, options: CreatePaymentOptions) => Promise<PaymentResponse>;
     retrieve: (paymentId: string, signal?: AbortSignal) => Promise<PaymentResponse>;
     sync: (paymentId: string, signal?: AbortSignal) => Promise<PaymentResponse>;
     cancel: (paymentId: string, signal?: AbortSignal) => Promise<PaymentResponse>;
-    refund: (paymentId: string, signal?: AbortSignal) => Promise<PaymentResponse>;
+    refund: (
+      paymentId: string,
+      options?: RefundPaymentOptions | AbortSignal,
+    ) => Promise<PaymentResponse>;
     list: (options?: ListPaymentsOptions | string, signal?: AbortSignal) => Promise<PaymentResponse[]>;
   };
   readonly providers: {
@@ -87,11 +95,31 @@ export class BarzanoPay {
           method: 'POST',
           ...(signal ? { signal } : {}),
         }),
-      refund: (paymentId, signal) =>
-        this.request<PaymentResponse>(`/api/v1/payments/${encodeURIComponent(paymentId)}/refund`, {
-          method: 'POST',
-          ...(signal ? { signal } : {}),
-        }),
+      refund: (paymentId, options = {}) => {
+        const refundOptions: RefundPaymentOptions =
+          isAbortSignal(options)
+            ? { signal: options }
+            : options;
+        if (refundOptions.amount !== undefined) {
+          if (!Number.isSafeInteger(refundOptions.amount) || refundOptions.amount <= 0) {
+            throw new Error('amount must be a positive integer in cents.');
+          }
+          if (!refundOptions.idempotencyKey?.trim()) {
+            throw new Error('idempotencyKey is required for partial refunds.');
+          }
+        }
+        return this.request<PaymentResponse>(
+          `/api/v1/payments/${encodeURIComponent(paymentId)}/refund`,
+          {
+            method: 'POST',
+            body: refundOptions.amount === undefined ? {} : { amount: refundOptions.amount },
+            ...(refundOptions.signal ? { signal: refundOptions.signal } : {}),
+            ...(refundOptions.idempotencyKey
+              ? { headers: { 'Idempotency-Key': refundOptions.idempotencyKey } }
+              : {}),
+          },
+        );
+      },
       list: (options = {}, legacySignal) => {
         const filters: ListPaymentsOptions = typeof options === 'string'
           ? { externalId: options, ...(legacySignal ? { signal: legacySignal } : {}) }

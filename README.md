@@ -166,6 +166,10 @@ const current = await barzano.payments.retrieve(payment.id);
 const synchronized = await barzano.payments.sync(payment.id);
 const canceled = await barzano.payments.cancel(payment.id);
 const refunded = await barzano.payments.refund(payment.id);
+const partiallyRefunded = await barzano.payments.refund(payment.id, {
+  amount: 500,
+  idempotencyKey: 'pedido-123-reembolso-500-v1',
+});
 ```
 
 `retrieve` lê o estado persistido; `sync` consulta o provider e atualiza o pagamento; `cancel`
