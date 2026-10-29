@@ -148,7 +148,7 @@ describe('BarzanoPay', () => {
     );
   });
 
-  it('synchronizes and cancels payments through the recommended public resource', async () => {
+  it('synchronizes, cancels and refunds payments through the recommended public resource', async () => {
     const fetchFn = vi.fn<typeof fetch>().mockImplementation(async () =>
       new Response(JSON.stringify({ id: 'pay/1', status: 'CANCELED' }), { status: 200 }),
     );
@@ -156,6 +156,7 @@ describe('BarzanoPay', () => {
 
     await client.payments.sync('pay/1');
     await client.payments.cancel('pay/1');
+    await client.payments.refund('pay/1');
 
     expect(fetchFn).toHaveBeenNthCalledWith(
       1,
@@ -165,6 +166,11 @@ describe('BarzanoPay', () => {
     expect(fetchFn).toHaveBeenNthCalledWith(
       2,
       'https://pay.barzano.com.br/api/v1/payments/pay%2F1/cancel',
+      expect.objectContaining({ method: 'POST' }),
+    );
+    expect(fetchFn).toHaveBeenNthCalledWith(
+      3,
+      'https://pay.barzano.com.br/api/v1/payments/pay%2F1/refund',
       expect.objectContaining({ method: 'POST' }),
     );
   });

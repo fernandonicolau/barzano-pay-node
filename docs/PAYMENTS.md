@@ -124,7 +124,7 @@ const payment = await barzano.payments.create(
 );
 ```
 
-## Consultar, sincronizar, cancelar e listar
+## Consultar, sincronizar, cancelar, reembolsar e listar
 
 ```ts
 const payment = await barzano.payments.retrieve('payment-id');
@@ -134,6 +134,9 @@ const synchronized = await barzano.payments.sync('payment-id');
 
 // Cancela uma cobrança ainda não paga e devolve o estado normalizado.
 const canceled = await barzano.payments.cancel('payment-id');
+
+// Reembolsa integralmente uma cobrança paga.
+const refunded = await barzano.payments.refund('payment-id');
 
 const payments = await barzano.payments.list({
   storeId: 'uuid-da-loja',
@@ -151,6 +154,9 @@ O cancelamento é permitido somente enquanto o pagamento não tiver sido pago. S
 `CANCEL_TIMEOUT_RECONCILIATION_REQUIRED`, a Barzano Pay já consultou o provider antes de encerrar a
 requisição e não enviou uma segunda ordem de cancelamento. Consulte `retrieve` e, se necessário,
 execute `sync` com o mesmo ID antes de decidir a próxima ação.
+
+O reembolso integral é idempotente e só é aceito para pagamentos com status `PAID` em providers
+que anunciam `supportsRefund`. Reembolso parcial permanece fora deste contrato.
 
 ## Resposta
 
