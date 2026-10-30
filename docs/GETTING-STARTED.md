@@ -42,7 +42,7 @@ const payment = await barzano.payments.create(
     amount: 200,
     currency: 'BRL',
     method: 'PIX',
-    expiresIn: 1800,
+    expiration: { value: 30, unit: 'MINUTES' },
     payer: {
       name: 'Cliente Teste',
       email: 'cliente@example.com',
@@ -55,7 +55,8 @@ const payment = await barzano.payments.create(
 console.log(payment.id, payment.status, payment.pix?.copyAndPaste);
 ```
 
-`amount` usa centavos: `200` representa R$ 2,00. `expiresIn` usa segundos.
+`amount` usa centavos: `200` representa R$ 2,00. Para PIX, prefira `expiration` com `MINUTES`,
+`HOURS` ou `DAYS`; `expiresIn` em segundos continua disponível para compatibilidade.
 
 Próximos passos: [pagamentos](PAYMENTS.md), [webhooks](WEBHOOKS.md) e
 [tratamento de erros](ERRORS.md).

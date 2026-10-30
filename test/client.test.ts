@@ -62,6 +62,37 @@ describe('BarzanoPay', () => {
     expect(String(request?.body)).not.toContain('customer');
   });
 
+  it('sends human-readable PIX expiration', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(new Response('{}', { status: 201 }));
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
+    await client.payments.create({
+      externalId: 'exp', storeId: 'store_1', amount: 200, currency: 'BRL', method: 'PIX',
+      expiration: { value: 90, unit: 'MINUTES' },
+      payer: { name: 'Cliente', email: 'cliente@example.com', taxId: '52998224725' },
+    }, { idempotencyKey: 'exp-v1' });
+    expect(JSON.parse(String(fetchFn.mock.calls[0]?.[1]?.body))).toMatchObject({
+      expiration: { value: 90, unit: 'MINUTES' },
+    });
+  });
+
+  it('converts boleto dueInDays to a civil date', async () => {
+    vi.useFakeTimers().setSystemTime(new Date('2026-10-30T23:30:00-03:00'));
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(new Response('{}', { status: 201 }));
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
+    await client.payments.create({
+      externalId: 'boleto', storeId: 'store_1', amount: 200, currency: 'BRL', method: 'BOLETO',
+      boleto: { dueInDays: 7, holderAddress: {
+        street: 'Rua A', number: '1', locality: 'Centro', city: 'São Paulo', region: 'São Paulo',
+        regionCode: 'SP', country: 'BRA', postalCode: '01001000',
+      } },
+      payer: { name: 'Cliente', email: 'cliente@example.com', taxId: '52998224725' },
+    }, { idempotencyKey: 'boleto-v1' });
+    const body = JSON.parse(String(fetchFn.mock.calls[0]?.[1]?.body));
+    expect(body.boleto).toMatchObject({ dueDate: '2026-11-07' });
+    expect(body.boleto).not.toHaveProperty('dueInDays');
+    vi.useRealTimers();
+  });
+
   it('forwards provider and exact payment account selection without provider-specific payloads', async () => {
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
       new Response(JSON.stringify({ id: 'pay_1' }), { status: 201 }),

@@ -14,7 +14,7 @@ const input: CreatePaymentInput = {
   amount: 4090,
   currency: 'BRL',
   method: 'PIX',
-  expiresIn: 1800,
+  expiration: { value: 30, unit: 'MINUTES' },
   payer: {
     name: 'José da Silva',
     email: 'jose@example.com',
@@ -80,7 +80,7 @@ const payment = await barzano.payments.create(
       taxId: '52998224725',
     },
     boleto: {
-      dueDate: '2026-10-30',
+      dueInDays: 7,
       holderAddress: {
         street: 'Avenida Paulista',
         number: '1000',

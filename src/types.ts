@@ -27,11 +27,25 @@ export interface PaymentAddress {
   postalCode: string;
 }
 
-export interface BoletoOptions {
-  /** Due date in YYYY-MM-DD format. */
-  dueDate: string;
-  holderAddress: PaymentAddress;
+export type PaymentExpirationUnit = 'MINUTES' | 'HOURS' | 'DAYS';
+
+export interface PaymentExpiration {
+  value: number;
+  unit: PaymentExpirationUnit;
 }
+
+type PaymentExpirationOptions =
+  | { expiration?: PaymentExpiration; expiresIn?: never }
+  | { expiration?: never; expiresIn?: number };
+
+type BoletoDueDate =
+  | { dueDate: string; dueInDays?: never }
+  | { dueDate?: never; dueInDays: number };
+
+export type BoletoOptions = BoletoDueDate & {
+  /** Calendar due date or a whole-day shortcut converted to YYYY-MM-DD by the SDK. */
+  holderAddress: PaymentAddress;
+};
 
 export interface CreditCardOptions {
   /** Single-use card ciphertext created in the payer's browser by the provider SDK. */
@@ -51,8 +65,6 @@ interface CreatePaymentBase {
   amount: number;
   currency: 'BRL';
   description?: string;
-  /** Expiration in seconds (1 to 2,592,000). */
-  expiresIn?: number;
   payer: Payer;
   /** Provider returned by providers.list(). Omit to use the primary eligible account. */
   providerCode?: string;
@@ -62,7 +74,7 @@ interface CreatePaymentBase {
 }
 
 export type CreatePaymentInput =
-  | (CreatePaymentBase & { method: 'PIX'; boleto?: never; creditCard?: never })
+  | (CreatePaymentBase & PaymentExpirationOptions & { method: 'PIX'; boleto?: never; creditCard?: never })
   | (CreatePaymentBase & { method: 'BOLETO'; boleto: BoletoOptions; creditCard?: never })
   | (CreatePaymentBase & { method: 'CREDIT_CARD'; creditCard: CreditCardOptions; boleto?: never });
 
@@ -70,7 +82,7 @@ export type CreatePaymentInput =
 export type Customer = Payer;
 
 /** @deprecated Use CreatePaymentInput with payer and expiresIn. */
-export type LegacyCreatePaymentInput = Omit<CreatePaymentBase, 'payer' | 'expiresIn'> & {
+export type LegacyCreatePaymentInput = Omit<CreatePaymentBase, 'payer'> & {
   method: PaymentMethod;
   customer: Customer;
   expiresAt?: string;

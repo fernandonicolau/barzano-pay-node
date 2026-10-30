@@ -14,7 +14,7 @@ const payment = await client.payments.create({
   currency: 'BRL',
   currency: 'BRL',
   method: 'PIX',
-  expiresIn: 1800,
+  expiration: { value: 30, unit: 'MINUTES' },
   payer: { name: 'Cliente Teste', email: 'cliente@example.com', taxId: '52998224725' },
 }, { idempotencyKey: 'pedido-' + Date.now() });
 console.log(payment);

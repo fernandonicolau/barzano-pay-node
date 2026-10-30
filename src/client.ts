@@ -174,6 +174,26 @@ export class BarzanoPay {
       }
       normalized.expiresIn = Math.max(1, Math.ceil(milliseconds / 1000));
     }
+    if (normalized.expiration !== undefined && normalized.expiresIn !== undefined) {
+      throw new Error('expiration and expiresIn cannot be sent together.');
+    }
+    const boleto = normalized.boleto as
+      | { dueDate?: string; dueInDays?: number; [key: string]: unknown }
+      | undefined;
+    if (boleto?.dueDate !== undefined && boleto.dueInDays !== undefined) {
+      throw new Error('boleto.dueDate and boleto.dueInDays cannot be sent together.');
+    }
+    if (boleto?.dueInDays !== undefined) {
+      if (!Number.isSafeInteger(boleto.dueInDays) || boleto.dueInDays < 0) {
+        throw new Error('boleto.dueInDays must be a non-negative integer.');
+      }
+      const due = new Date();
+      due.setUTCHours(0, 0, 0, 0);
+      due.setUTCDate(due.getUTCDate() + boleto.dueInDays);
+      const normalizedBoleto = { ...boleto };
+      delete normalizedBoleto.dueInDays;
+      normalized.boleto = { ...normalizedBoleto, dueDate: due.toISOString().slice(0, 10) };
+    }
     return normalized;
   }
 
