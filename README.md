@@ -81,7 +81,7 @@ const payment = await barzano.payments.create(
     amount: 200,
     currency: 'BRL',
     method: 'PIX',
-    expiresIn: 1800, // o QR Code PIX expira em 30 minutos
+    expiration: { value: 30, unit: 'MINUTES' },
     payer: {
       name: 'Cliente Teste',
       email: 'cliente@example.com',
@@ -112,7 +112,7 @@ const input: CreatePaymentInput = {
   amount: 200,
   currency: 'BRL',
   method: 'PIX',
-  expiresIn: 1800,
+  expiration: { value: 30, unit: 'MINUTES' },
   payer: {
     name: 'Cliente Teste',
     email: 'cliente@example.com',
@@ -183,7 +183,8 @@ mantêm `code`, status HTTP e `requestId`.
 concluídos, falharam ou precisam de reconciliação, sem exigir conhecimento do provider.
 
 O SDK usa o contrato público `POST /api/v1/payments`. Nesse contrato, envie `method`, `payer` e,
-para definir a validade do PIX, `expiresIn` em segundos. O endpoint `/api/v1/charges` existe apenas
+para definir a validade do PIX, `expiration` com `MINUTES`, `HOURS` ou `DAYS`. O campo `expiresIn`
+em segundos permanece apenas para compatibilidade. O endpoint `/api/v1/charges` existe apenas
 para integrações antigas e usa `paymentMethod`; não misture os dois formatos. As versões antigas do
 SDK que usavam `customer` continuam aceitas e são convertidas para `payer` antes do envio.
 

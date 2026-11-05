@@ -36,7 +36,11 @@ export interface PaymentExpiration {
 
 type PaymentExpirationOptions =
   | { expiration?: PaymentExpiration; expiresIn?: never }
-  | { expiration?: never; expiresIn?: number };
+  | {
+      expiration?: never;
+      /** @deprecated Use expiration with MINUTES, HOURS or DAYS. */
+      expiresIn?: number;
+    };
 
 type BoletoDueDate =
   | { dueDate: string; dueInDays?: never }
@@ -81,7 +85,7 @@ export type CreatePaymentInput =
 /** @deprecated Use Payer. */
 export type Customer = Payer;
 
-/** @deprecated Use CreatePaymentInput with payer and expiresIn. */
+/** @deprecated Use CreatePaymentInput with payer and expiration. */
 export type LegacyCreatePaymentInput = Omit<CreatePaymentBase, 'payer'> & {
   method: PaymentMethod;
   customer: Customer;

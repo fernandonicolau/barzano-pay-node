@@ -37,6 +37,9 @@ estáveis, independentemente do banco selecionado:
 | `PAYMENT_PROVIDER_CONFIGURATION_ERROR`     |  503 | Revise a conta e as credenciais do provider no painel.           |
 | `PAYMENT_PROVIDER_TEMPORARILY_UNAVAILABLE` |  503 | Tente novamente mais tarde usando a mesma chave e o mesmo corpo. |
 | `IDEMPOTENCY_KEY_REUSED`                   |  409 | Use uma nova chave quando alterar qualquer campo do pagamento.   |
+| `EXPIRATION_FIELDS_CONFLICT`               |  400 | Envie somente `expiration` ou o legado `expiresIn`.              |
+| `EXPIRATION_NOT_SUPPORTED`                 |  400 | Remova a expiração de boleto ou cartão. Use-a somente no PIX. |
+| `EXPIRATION_OUT_OF_RANGE`                  |  400 | Ajuste o prazo aos limites publicados para o provider.           |
 | `PAID_CHARGE_CANNOT_BE_CANCELED`           |  409 | O pagamento já foi pago; não repita o cancelamento.              |
 | `CANCEL_TIMEOUT_RECONCILIATION_REQUIRED`   |  504 | Consulte ou sincronize o mesmo pagamento antes de tentar de novo.|
 
