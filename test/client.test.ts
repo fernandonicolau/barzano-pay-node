@@ -75,6 +75,44 @@ describe('BarzanoPay', () => {
     });
   });
 
+  it('creates an Asaas hosted card checkout without card data', async () => {
+    const redirectUrl = 'https://sandbox.asaas.com/i/payment_1';
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: 'pay_asaas_1',
+          status: 'WAITING_PAYMENT',
+          nextAction: { type: 'REDIRECT', url: redirectUrl },
+        }),
+        { status: 201, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+    const client = new BarzanoPay({ apiKey: 'pay_test_secret', fetch: fetchFn });
+
+    const payment = await client.payments.create(
+      {
+        externalId: 'card-hosted-1',
+        storeId: 'store_1',
+        amount: 599,
+        currency: 'BRL',
+        method: 'CREDIT_CARD',
+        providerCode: 'ASAAS',
+        payer: { name: 'Cliente', email: 'cliente@example.com', taxId: '52998224725' },
+        creditCard: { flow: 'REDIRECT', installments: 2 },
+      },
+      { idempotencyKey: 'card-hosted-1-v1' },
+    );
+
+    const requestBody = String(fetchFn.mock.calls[0]?.[1]?.body);
+    expect(JSON.parse(requestBody)).toMatchObject({
+      method: 'CREDIT_CARD',
+      providerCode: 'ASAAS',
+      creditCard: { flow: 'REDIRECT', installments: 2 },
+    });
+    expect(requestBody).not.toMatch(/cardNumber|securityCode|cvv|pan/i);
+    expect(payment.nextAction).toEqual({ type: 'REDIRECT', url: redirectUrl });
+  });
+
   it('converts boleto dueInDays to a civil date', async () => {
     vi.useFakeTimers().setSystemTime(new Date('2026-10-30T23:30:00-03:00'));
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(new Response('{}', { status: 201 }));

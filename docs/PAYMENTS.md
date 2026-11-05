@@ -208,7 +208,15 @@ if (payment.nextAction.type === 'DISPLAY_QR_CODE') {
 if (payment.nextAction.type === 'DISPLAY_BOLETO') {
   showBoleto(payment.nextAction.digitableLine, payment.nextAction.documentUrl);
 }
+
+if (payment.nextAction.type === 'REDIRECT') {
+  window.location.assign(payment.nextAction.url);
+}
 ```
+
+No checkout hospedado do Asaas, crie o cartão com `creditCard: { flow: 'REDIRECT' }`. A resposta
+traz a `invoiceUrl` segura em `nextAction.url`; o frontend pode abrir esse endereço ou apresentá-lo
+em um botão "Pagar". Nenhum dado do cartão passa pela Barzano Pay nesse fluxo.
 
 O CPF/CNPJ precisa ser matematicamente válido. O documento e o e-mail do pagador precisam identificar o comprador e ser diferentes dos dados do
 estabelecimento e do titular da conta no provider.

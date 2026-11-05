@@ -16,6 +16,8 @@ ao banco ou provider.
 - [Erros, idempotência e observabilidade](docs/ERRORS.md)
 - [CLI e configuração assistida](docs/CLI.md)
 - [Migração e tipos depreciados](docs/MIGRATION.md)
+- [Processo de publicação](docs/RELEASING.md)
+- [Histórico de versões](CHANGELOG.md)
 
 ## Providers e meios disponíveis
 

@@ -52,6 +52,8 @@ export type BoletoOptions = BoletoDueDate & {
 };
 
 export interface CreditCardOptions {
+  /** TOKENIZED sends a provider token; REDIRECT requests a provider-hosted checkout page. */
+  flow?: 'TOKENIZED' | 'REDIRECT';
   /** Single-use card ciphertext created in the payer's browser by the provider SDK. */
   encrypted?: string;
   /** Provider card token. Never send PAN or CVV in this field. */
@@ -165,10 +167,16 @@ export interface CardPaymentInstructions {
   authorizationCode: string | null;
 }
 
+export interface RedirectPaymentInstructions {
+  type: 'REDIRECT';
+  url: string;
+}
+
 export type PaymentInstructions =
   | PixPaymentInstructions
   | BoletoPaymentInstructions
-  | CardPaymentInstructions;
+  | CardPaymentInstructions
+  | RedirectPaymentInstructions;
 
 export interface PaymentProviderResponse {
   code: string;
@@ -187,7 +195,8 @@ export type PaymentNextAction =
       digitableLine: string;
       documentUrl: string;
       expiresAt: string | null;
-    };
+    }
+  | { type: 'REDIRECT'; url: string };
 
 export interface PaymentResponse {
   id: string;

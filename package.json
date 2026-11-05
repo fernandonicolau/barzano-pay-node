@@ -1,6 +1,6 @@
 {
   "name": "@barzano/pay",
-  "version": "0.8.0",
+  "version": "0.10.0",
   "description": "SDK oficial TypeScript para a API da Barzano Pay",
   "license": "MIT",
   "type": "module",
@@ -20,6 +20,7 @@
   "files": [
     "dist",
     "docs",
+    "CHANGELOG.md",
     "README.md",
     "LICENSE"
   ],
