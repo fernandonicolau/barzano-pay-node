@@ -214,9 +214,10 @@ if (payment.nextAction.type === 'REDIRECT') {
 }
 ```
 
-No checkout hospedado do Asaas, crie o cartão com `creditCard: { flow: 'REDIRECT' }`. A resposta
-traz a `invoiceUrl` segura em `nextAction.url`; o frontend pode abrir esse endereço ou apresentá-lo
-em um botão "Pagar". Nenhum dado do cartão passa pela Barzano Pay nesse fluxo.
+`nextAction.type === 'REDIRECT'` está reservado para uma ação externa, como autenticação 3DS ou o
+futuro produto de checkout hospedado. O fluxo hospedado do Asaas permanece experimental,
+desabilitado no catálogo e não faz parte do MVP de delivery. A prioridade é o cartão integrado,
+preenchido dentro da plataforma e tokenizado ou criptografado pelo SDK oficial do provider.
 
 O CPF/CNPJ precisa ser matematicamente válido. O documento e o e-mail do pagador precisam identificar o comprador e ser diferentes dos dados do
 estabelecimento e do titular da conta no provider.

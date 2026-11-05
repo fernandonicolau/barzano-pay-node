@@ -2,8 +2,8 @@
 
 ## 0.10.0 — preparada, ainda não publicada
 
-- adiciona o fluxo de cartão hospedado com `creditCard.flow = 'REDIRECT'`;
-- adiciona `nextAction.type = 'REDIRECT'` para abrir a página segura do provider;
+- reserva `nextAction.type = 'REDIRECT'` para ações externas e checkout hospedado futuro;
+- mantém o fluxo hospedado experimental fora das capabilities do MVP de delivery;
 - mantém cartão tokenizado do Mercado Pago e cartão criptografado do PagBank tipados;
 - mantém vencimentos humanos para PIX e boleto;
 - atualiza exemplos e tipos sem expor PAN, CVV ou credenciais de provider.
