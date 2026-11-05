@@ -132,6 +132,18 @@ Quando `save` for `true`, a resposta aprovada pode criar um meio de pagamento sa
 `encrypted`, pois ele não pode ser reutilizado. Também é possível enviar um `token` emitido pelo
 provider quando o seu fluxo já possuir um token seguro.
 
+No Mercado Pago, use o Card Payment Brick ou o MercadoPago.js no navegador. Envie o token de uso
+único e o `payment_method_id` retornados pelo SDK; a Barzano Pay nunca deve receber PAN, CVV ou o
+formulário bruto do cartão:
+
+```ts
+creditCard: {
+  token: formData.token,
+  paymentMethodId: formData.payment_method_id,
+  installments: formData.installments,
+}
+```
+
 ## Consultar, sincronizar, cancelar, reembolsar e listar
 
 ```ts

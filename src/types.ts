@@ -56,6 +56,8 @@ export interface CreditCardOptions {
   encrypted?: string;
   /** Provider card token. Never send PAN or CVV in this field. */
   token?: string;
+  /** Payment method identifier returned by the provider browser SDK, such as `master`. */
+  paymentMethodId?: string;
   /** Barzano Pay saved payment method identifier returned by a previous payment. */
   savedPaymentMethodId?: string;
   installments?: number;
