@@ -98,7 +98,7 @@ describe('BarzanoPay', () => {
         method: 'CREDIT_CARD',
         providerCode: 'ASAAS',
         payer: { name: 'Cliente', email: 'cliente@example.com', taxId: '52998224725' },
-        creditCard: { flow: 'REDIRECT', installments: 2 },
+        creditCard: { checkoutMode: 'HOSTED', installments: 2 },
       },
       { idempotencyKey: 'card-hosted-1-v1' },
     );
@@ -107,7 +107,7 @@ describe('BarzanoPay', () => {
     expect(JSON.parse(requestBody)).toMatchObject({
       method: 'CREDIT_CARD',
       providerCode: 'ASAAS',
-      creditCard: { flow: 'REDIRECT', installments: 2 },
+      creditCard: { checkoutMode: 'HOSTED', installments: 2 },
     });
     expect(requestBody).not.toMatch(/cardNumber|securityCode|cvv|pan/i);
     expect(payment.nextAction).toEqual({ type: 'REDIRECT', url: redirectUrl });

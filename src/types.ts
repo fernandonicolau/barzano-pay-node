@@ -52,8 +52,8 @@ export type BoletoOptions = BoletoDueDate & {
 };
 
 export interface CreditCardOptions {
-  /** TOKENIZED sends a provider token; REDIRECT requests a provider-hosted checkout page. */
-  flow?: 'TOKENIZED' | 'REDIRECT';
+  /** EMBEDDED keeps the form in your platform; HOSTED requests a provider page when supported. */
+  checkoutMode?: 'EMBEDDED' | 'HOSTED';
   /** Single-use card ciphertext created in the payer's browser by the provider SDK. */
   encrypted?: string;
   /** Provider card token. Never send PAN or CVV in this field. */

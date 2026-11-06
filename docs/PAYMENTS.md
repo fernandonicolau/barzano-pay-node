@@ -118,6 +118,7 @@ const payment = await barzano.payments.create(
       taxId: '52998224725',
     },
     creditCard: {
+      checkoutMode: 'EMBEDDED',
       encrypted: 'cartao-criptografado-no-navegador',
       installments: 2,
       save: true,
@@ -138,6 +139,7 @@ formulário bruto do cartão:
 
 ```ts
 creditCard: {
+  checkoutMode: 'EMBEDDED',
   token: formData.token,
   paymentMethodId: formData.payment_method_id,
   installments: formData.installments,

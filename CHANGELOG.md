@@ -4,6 +4,7 @@
 
 - reserva `nextAction.type = 'REDIRECT'` para ações externas e checkout hospedado futuro;
 - mantém o fluxo hospedado experimental fora das capabilities do MVP de delivery;
+- separa o meio `CREDIT_CARD` da experiência `checkoutMode` (`EMBEDDED` ou `HOSTED`);
 - mantém cartão tokenizado do Mercado Pago e cartão criptografado do PagBank tipados;
 - mantém vencimentos humanos para PIX e boleto;
 - atualiza exemplos e tipos sem expor PAN, CVV ou credenciais de provider.
