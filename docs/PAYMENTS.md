@@ -100,6 +100,9 @@ const payment = await barzano.payments.create(
 ## Cartão
 
 O cartão deve chegar tokenizado ou criptografado pelo provider. Não envie PAN ou CVV em texto puro.
+Use o submódulo [`@barzano/pay/browser`](BROWSER-CHECKOUT.md) para normalizar o Card Payment Brick
+do Mercado Pago e a criptografia client-side do PagBank. O cliente Node permanece somente no
+servidor.
 No PagBank, gere `encrypted` no navegador com o SDK oficial e a chave pública da conta. O valor é
 de uso único e deve ser enviado imediatamente à Barzano Pay. A integration key da Barzano e o token
 da conta PagBank permanecem somente no servidor.

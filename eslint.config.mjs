@@ -10,5 +10,9 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
     rules: { '@typescript-eslint/consistent-type-imports': 'error' },
   },
+  {
+    files: ['examples/**/*.ts'],
+    languageOptions: { globals: globals.browser },
+  },
   { ignores: ['dist/**', 'node_modules/**'] },
 );

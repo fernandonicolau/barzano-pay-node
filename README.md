@@ -12,6 +12,7 @@ ao banco ou provider.
 
 - [Início rápido e configuração](docs/GETTING-STARTED.md)
 - [Criar e consultar pagamentos](docs/PAYMENTS.md)
+- [Checkout integrado de cartão no navegador](docs/BROWSER-CHECKOUT.md)
 - [Receber e validar webhooks](docs/WEBHOOKS.md)
 - [Erros, idempotência e observabilidade](docs/ERRORS.md)
 - [CLI e configuração assistida](docs/CLI.md)

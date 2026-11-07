@@ -15,6 +15,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js",
+      "require": "./dist/browser.cjs"
     }
   },
   "files": [
@@ -54,10 +59,11 @@
     "esbuild": "$esbuild"
   },
   "scripts": {
-    "build": "tsup src/index.ts src/cli.ts --format esm,cjs --dts --clean",
+    "build": "tsup src/index.ts src/cli.ts src/browser.ts --format esm,cjs --dts --clean",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
+    "example:mercado-pago-card": "vite --host 127.0.0.1 examples/mercado-pago-card",
     "check": "npm run typecheck && npm run lint && npm test && npm run build",
     "prepublishOnly": "npm run check"
   },

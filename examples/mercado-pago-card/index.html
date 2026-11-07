@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Barzano Pay — cartão Mercado Pago sandbox</title>
+    <style>
+      :root { font-family: Inter, system-ui, sans-serif; color: #132238; background: #f5f8fa; }
+      body { margin: 0; padding: 32px 16px; }
+      main { max-width: 760px; margin: auto; background: white; padding: 28px; border-radius: 16px; box-shadow: 0 10px 35px #18344a17; }
+      h1 { margin-top: 0; }
+      label { display: block; font-weight: 700; margin: 18px 0 6px; }
+      input { box-sizing: border-box; width: 100%; padding: 12px; border: 1px solid #b9c7d4; border-radius: 8px; }
+      button { margin-top: 16px; padding: 12px 18px; border: 0; border-radius: 8px; background: #078976; color: white; font-weight: 700; cursor: pointer; }
+      button:disabled { cursor: wait; opacity: 0.65; }
+      pre { overflow: auto; padding: 16px; background: #eef5f4; border-radius: 8px; min-height: 72px; white-space: pre-wrap; }
+      .notice { padding: 12px; border-left: 4px solid #078976; background: #edf8f6; }
+      .error { color: #a51d2d; background: #fff1f2; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Cartão integrado Mercado Pago</h1>
+      <p class="notice">
+        Use somente a Public Key sandbox. A página não solicita Access Token nem integration key e
+        devolve apenas o fragmento seguro para o backend do integrador.
+      </p>
+      <label for="public-key">Public Key de teste</label>
+      <input id="public-key" autocomplete="off" placeholder="APP_USR-..." />
+      <label for="amount">Valor do teste em reais</label>
+      <input id="amount" inputmode="decimal" value="5,99" />
+      <button id="render" type="button">Renderizar formulário seguro</button>
+      <div id="mercado-pago-card"></div>
+      <h2>Fragmento seguro</h2>
+      <pre id="result" aria-live="polite">O resultado aparecerá aqui depois do envio.</pre>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
