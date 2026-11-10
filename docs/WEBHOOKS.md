@@ -8,6 +8,7 @@ Eventos disponíveis:
 
 - `charge.paid`;
 - `charge.expired`;
+- `charge.canceled`;
 - `charge.failed`;
 - `webhook.test`, enviado pelo botão de teste.
 
@@ -33,6 +34,7 @@ switch (event.type) {
     await markOrderAsPaid(event.data.externalId);
     break;
   case 'charge.expired':
+  case 'charge.canceled':
   case 'charge.failed':
     await reviewOrder(event.data.externalId, event.data.status);
     break;
@@ -57,3 +59,11 @@ app.post('/webhooks/barzano', express.raw({ type: 'application/json' }), async (
 
 Use `event.id` ou `X-Webhook-Id` para deduplicar. Responda HTTP 2xx depois de persistir o evento.
 Falhas são reenviadas e também podem ser reprocessadas pelo painel.
+
+`charge.expired` informa vencimento confirmado pelo provider; `charge.canceled` informa
+cancelamento. O PagBank cancela automaticamente o Pix cujo QR Code venceu, então o
+integrador deve tratar os dois eventos como encerramento sem pagamento. Não confirme
+a entrega nem faça estorno apenas com base no relógio da
+interface. Em especial, o Asaas pode confirmar posteriormente uma cobrança vencida:
+aceite `charge.paid` mesmo se já recebeu `charge.expired`. Antes de uma decisão
+irreversível, consulte `barzano.payments.retrieve(paymentId)` e considere o estado atual.

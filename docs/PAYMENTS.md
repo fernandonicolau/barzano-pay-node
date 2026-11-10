@@ -28,6 +28,18 @@ const payment: PaymentResponse = await barzano.payments.create(
 );
 ```
 
+Para um pedido com QR Code válido por cinco minutos, selecione uma conta **PagBank**
+e envie `expiration: { value: 5, unit: 'MINUTES' }`. Por exemplo, no payload acima,
+troque o prazo para cinco minutos e adicione `providerCode: 'PAGBANK'` (ou use
+`paymentAccountReference` para apontar uma conta específica). `amount` está em centavos.
+Mercado Pago exige pelo menos 30 minutos nesse fluxo; Asaas não aceita prazo
+explícito no PIX dinâmico atual. Consulte `capabilities.pixExpirationLimits` no
+catálogo (`null` significa indisponível). O legado `expiresIn: 300` obedece às
+mesmas regras. A API responde `EXPIRATION_OUT_OF_RANGE` ou
+`PIX_EXPIRATION_UNSUPPORTED_BY_PROVIDER` com HTTP 400 quando necessário.
+Use `payment.expiresAt` para exibir o prazo e consulte o estado ou receba o webhook
+para confirmar o pagamento; o relógio da interface não confirma nem cancela cobranças.
+
 ### Selecionar provider ou conta financeira
 
 O payload financeiro permanece igual para todos os providers. Descubra os providers habilitados e

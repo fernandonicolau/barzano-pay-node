@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.10.1 — preparado para publicação
+
+- documenta os limites de vencimento PIX do PagBank, Mercado Pago e Asaas;
+- adiciona `charge.canceled` ao contrato tipado de webhooks e orienta a confirmação tardia.
+
 ## 0.10.0 — preparada, ainda não publicada
 
 - reserva `nextAction.type = 'REDIRECT'` para ações externas e checkout hospedado futuro;

@@ -219,7 +219,11 @@ export interface PaymentResponse {
 /** @deprecated Use PaymentResponse. */
 export type Payment = PaymentResponse;
 
-export type FinancialWebhookEventType = 'charge.paid' | 'charge.expired' | 'charge.failed';
+export type FinancialWebhookEventType =
+  | 'charge.paid'
+  | 'charge.expired'
+  | 'charge.canceled'
+  | 'charge.failed';
 export type WebhookEventType = FinancialWebhookEventType | 'webhook.test';
 
 export interface PaymentWebhookData {

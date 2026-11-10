@@ -40,6 +40,7 @@ estáveis, independentemente do banco selecionado:
 | `EXPIRATION_FIELDS_CONFLICT`               |  400 | Envie somente `expiration` ou o legado `expiresIn`.              |
 | `EXPIRATION_NOT_SUPPORTED`                 |  400 | Remova a expiração de boleto ou cartão. Use-a somente no PIX. |
 | `EXPIRATION_OUT_OF_RANGE`                  |  400 | Ajuste o prazo aos limites publicados para o provider.           |
+| `PIX_EXPIRATION_UNSUPPORTED_BY_PROVIDER`   |  400 | Omita o prazo ou escolha uma conta que aceite vencimento preciso. |
 | `PAID_CHARGE_CANNOT_BE_CANCELED`           |  409 | O pagamento já foi pago; não repita o cancelamento.              |
 | `CANCEL_TIMEOUT_RECONCILIATION_REQUIRED`   |  504 | Consulte ou sincronize o mesmo pagamento antes de tentar de novo.|
 

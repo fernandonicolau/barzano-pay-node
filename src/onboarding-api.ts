@@ -37,6 +37,7 @@ export interface ProviderCatalogEntry {
   supportedEnvironments: Array<'SANDBOX' | 'PRODUCTION'>;
   capabilities: {
     supportedPaymentMethods: string[];
+    pixExpirationLimits?: { minSeconds: number; maxSeconds: number } | null;
   };
 }
 

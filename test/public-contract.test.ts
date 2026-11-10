@@ -5,12 +5,14 @@ import type {
   CreatePaymentInput,
   PaymentResponse,
   PaymentWebhookEvent,
+  FinancialWebhookEventType,
 } from '../src/index.js';
 
 describe('public TypeScript contract', () => {
   it('narrows payment instructions and webhook payloads by discriminator', () => {
     expectTypeOf<CreatePaymentInput['method']>().toEqualTypeOf<'PIX' | 'BOLETO' | 'CREDIT_CARD'>();
     expectTypeOf<PaymentResponse['currency']>().toEqualTypeOf<'BRL'>();
+    expectTypeOf<'charge.canceled'>().toExtend<FinancialWebhookEventType>();
 
     const handle = (event: AnyWebhookEvent): string => {
       if (event.type === 'webhook.test') return event.data.status;
